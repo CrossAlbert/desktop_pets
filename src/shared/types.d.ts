@@ -10,6 +10,7 @@ declare global {
     }
   }
 
+
   /**
    * 主线程发送给渲染线程的预览列表元素
    */
@@ -18,7 +19,7 @@ declare global {
     previewJsonPath: string
     // 预览图文件路径
     previewJpgPath: string
-    // 桌宠（live2d文件、音频文件、触摸预设文件）文件夹路径
+    // 桌宠（live2d文件、音频文件、触摸预设文件、预览信息、 预览图）文件夹路径
     petFilePath: string
   }
 
@@ -33,10 +34,10 @@ declare global {
     infor: string,
     // 位置 random为自动移动 | 固定位置
     position: 'random' | { x: number, y: number }
-    // 显示屏幕编号 默认屏幕1
-    range: number,
-    // live2d文件名称
-    liveName: string
+    // live2d文件夹名称
+    live2dFolder: string
+    // live2d配置json文件名
+    modelJsonName: string
   }
 
 
@@ -46,6 +47,68 @@ declare global {
   type PreviewInforIpc = PreviewInfor & {
     // 存储被指定桌宠的文件路径
     petFilePath: string
+  }
+
+  /**
+   * 桌宠页面创建后返回的信息
+   */
+  type PetWindowInfor = { 
+    windowId: number 
+    windowWidth: number
+    windowHeight: number 
+  }
+
+
+  // -----------------------------------------------------------------------------------
+
+
+  // 用于描述每个动作、音频、文本、结束延时之间的关系的结构体
+  type RelationshipItem = {
+    expressionName: string
+    audioName: string | null
+    text: string | null
+    delayed: number
+  }
+
+
+  // 休眠动作配置
+  type SleepItem = RelationshipItem
+
+
+  // 休眠后被唤醒动作
+  type AwakenItem = RelationshipItem
+
+
+  // 触碰配置
+  type TouchItem = {
+    // 请使用Cubism Viewer打开moc3文件后
+    // 点击左侧文件栏中xxx.moc3后
+    // 将下方"参数"选项卡调整为"图形网格"
+    // drawableId为选项卡中的index
+    drawableId: number
+    // drawableName为选项卡中的ID
+    // 用来绑定点击位置
+    drawableName: string
+    type: "Expression"
+    relationship: Array<RelationshipItem>
+  }
+
+
+  // 桌宠配置config_pet.json内结构
+  type PetConfig = {
+    // 默认待机
+    defaultExpression: string
+    // 屏蔽的部件（透明度调整为0）
+    // 请使用Cubism Viewer打开moc3文件后
+    // 点击左侧文件栏中xxx.moc3后
+    // 将下方"参数"选项卡调整为"部件"
+    // 将要透明化的部件名称写入列表
+    shieldPartList: Array<string>
+    // 休眠动画和语音
+    sleep: Array<SleepItem>
+    // 唤醒动画和语音
+    awaken: Array<AwakenItem>
+    touchList: Array<TouchItem>
   }
 
 }

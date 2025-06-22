@@ -98,7 +98,6 @@ const stopPet = async (windowId: number, index: number) => {
       <img :src="item.previewJpgBase64">
       <span>{{ item.previewInfor.name }}</span>
       <span>{{ item.previewInfor.infor }}</span>
-      <span>行动范围：屏幕{{ item.previewInfor.range }}</span>
       <span>位置：{{ getPosition(item.previewInfor.position) }}</span>
 
       <div class="statusPrompt">

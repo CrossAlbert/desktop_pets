@@ -1,19 +1,158 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref } from 'vue';
+import live2d from '../live2d/main';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+
+const dragFlag = ref(false);
+let startX = 0;
+let startY = 0;
+
+const mousedownHandle = (e: MouseEvent) => {
+    if (e.button === 2) {
+        // 右键按下
+        dragFlag.value = true;
+        startX = e.screenX;
+        startY = e.screenY;
+    }
+}
+
+
+const mouseupHandle = (e: MouseEvent) => {
+    if (e.button === 2) {
+        // 右键松开
+        dragFlag.value = false;
+        startX = 0;
+        startY = 0;
+    }
+}
+
+
+// 移动窗口
+const mousemoveHandle = (e: MouseEvent) => {
+    if (dragFlag.value && e.button === 2) {
+        const deltaX = e.screenX - startX;
+        const deltaY = e.screenY - startY;
+        window.electron.ipcRenderer.send('move-window', deltaX, deltaY);
+        startX = e.screenX;
+        startY = e.screenY;
+    }
+}
+
+
+onMounted(() => {
+    const {
+        petFilePath,
+        live2dFolder,
+        modelJsonName
+    } = route.params as unknown as PreviewInforIpc;
+    // 开启实例
+    live2d.live2dStart(petFilePath, live2dFolder, modelJsonName);
+    // 添加右键监听 用于拖动窗口
+    document.addEventListener('mousedown', mousedownHandle);
+    document.addEventListener('mouseup', mouseupHandle);
+    document.addEventListener('mousemove', mousemoveHandle);
+})
+
+
+onUnmounted(() => {
+    // 关闭sdk 
+    live2d.live2dEnd();
+    document.removeEventListener('mousedown', mousedownHandle);
+    document.removeEventListener('mouseup', mouseupHandle);
+    document.removeEventListener('mousemove', mousemoveHandle);
+})
+
+
+// const change_volume = () => {
+//     let audioPlayer: HTMLAudioElement = document.getElementById("audioPlayer") as HTMLAudioElement
+//     audioPlayer.volume = volume.value / 100
+// }
+
+
 </script>
 
 <template>
-    <div class="petBox">
-
+    <div class="petHome">
+        <!-- 语音文字框 -->
+        <div id="text_container"></div>
+        <!-- live2d画布容器 -->
+        <div id="canvas_container"></div>
     </div>
 </template>
 
-<style lang="css" scoped>
-.petBox{
+<style scoped>
+.petHome {
     width: 100vw;
     height: 100vh;
     box-sizing: border-box;
-    border: 1px solid red;
-    background-color: aquamarine;
-    -webkit-app-region: drag;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #303133;
+}
+</style>
+
+
+<style>
+#canvas_container {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+
+#text_container {
+    position: absolute;
+    z-index: 1000;
+    bottom: 22vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: max-content;
+    pointer-events: none;
+    transition: all .2s;
+}
+
+
+#text_container>span {
+    display: block;
+    padding: 20px;
+    letter-spacing: 2px;
+    border-radius: 16px;
+    color: #303133;
+    background-color: rgba(255, 255, 255, 0.75);
+    opacity: 0;
+    transform-origin: center bottom;
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(1, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1, 1);
+    }
+}
+
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1, 1);
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(1, 0);
+    }
 }
 </style>

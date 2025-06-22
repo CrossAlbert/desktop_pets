@@ -4,7 +4,7 @@ import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 // 创建桌宠窗口
-const createPetWindow = (infor: PreviewInforIpc): number => {
+const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
     // 创建浏览器窗口
     const petWindow = new BrowserWindow({
         width: 900,
@@ -72,14 +72,19 @@ const createPetWindow = (infor: PreviewInforIpc): number => {
             params: {
                 name: infor.name,
                 petFilePath: infor.petFilePath,
-                liveName: infor.liveName
+                live2dFolder: infor.live2dFolder,
+                modelJsonName: infor.modelJsonName
             }
         }
         // 发送信号切换路由到控制页面
         petWindow.webContents.send('select-router', routerMessage)
     });
 
-    return petWindow.id
+    return {
+        windowId: petWindow.id,
+        windowWidth: 900,
+        windowHeight: 670,
+    }
 
 }
 

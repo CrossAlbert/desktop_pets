@@ -601,7 +601,7 @@ export class LAppModel extends CubismUserModel {
         }
 
         // WebGLのテクスチャユニットにテクスチャをロードする
-        let texturePath = `${this._modelHomeDir}${this._modelSetting!.getTextureFileName(modelTextureNumber)}`;
+        let texturePath = `${this._modelHomeDir}/${this._modelSetting!.getTextureFileName(modelTextureNumber)}`;
 
         // 加载完成时调用的回调函数
         const onLoad = (textureInfo: TextureInfo): void => {

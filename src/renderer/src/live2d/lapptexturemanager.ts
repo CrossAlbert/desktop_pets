@@ -54,11 +54,12 @@ export class LAppTextureManager {
     usePremultiply: boolean,
     callback: (textureInfo: TextureInfo) => void
   ): Promise<void> {
-    // 修改方法 加入get_base64方法 基于node 从设备磁盘获取图像的base64内容 
     // 加入img标签的src属性
     // 该方法变为异步
 
-    let file_base64 = await window.electron.ipcRenderer.invoke('get-image-base64', 'C:/Users/PC/AppData/Roaming/petsFile/mijiang/mijiang/mijiang.8192/texture_00.png') as string;
+    const imageBuffer = await window.electron.ipcRenderer.invoke('get-buffer', fileName);
+    const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
+    const imageUrl = URL.createObjectURL(imageBlob);
 
     if (this._textures == null) {
       return;
@@ -78,15 +79,13 @@ export class LAppTextureManager {
         // 第二次以后使用缓存（无等待时间）
         // 在WebKit中，需要重新实例化才能再次调用相同图像的onload
         // 詳細：https://stackoverflow.com/a/5024181
-        let old_base_64 = ite.ptr().file_base64
         ite.ptr().img = new Image();
         ite
           .ptr()
           .img.addEventListener('load', (): void => callback(ite.ptr()), {
             passive: true
           });
-        // ite.ptr().img.src = fileName;
-        ite.ptr().img.src = old_base_64;
+        ite.ptr().img.src = ite.ptr().imageUrl;
         return;
       }
     }
@@ -144,7 +143,7 @@ export class LAppTextureManager {
           textureInfo.img = img;
           textureInfo.usePremultply = usePremultiply;
           // 追加属性
-          textureInfo.file_base64 = file_base64
+          textureInfo.imageUrl = imageUrl
           this._textures!.pushBack(textureInfo);
         }
 
@@ -153,7 +152,7 @@ export class LAppTextureManager {
       { passive: true }
     );
     // img.src = fileName;
-    img.src = file_base64;
+    img.src = imageUrl;
   }
 
   /**
@@ -225,6 +224,6 @@ export class TextureInfo {
   height = 0; // 高さ
   usePremultply!: boolean; // Premult処理を有効にするか
   fileName!: string; // ファイル名
-  // 追加属性
-  file_base64!: string;
+  // 追加属性 blob图片url
+  imageUrl!: string;
 }

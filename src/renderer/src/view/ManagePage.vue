@@ -6,8 +6,8 @@ import { Ref, ref } from 'vue'
 type PreviewItemRenderer = {
   // 预览信息
   previewInfor: PreviewInfor
-  // 预览图编码
-  previewJpgBase64: string
+  // 预览图Blob路径
+  previewJpgBlobUrl: string
   // 桌宠（live2d文件、音频文件、触摸预设文件）文件夹路径
   petFilePath: string
   // 桌宠窗口id null代表未启动
@@ -26,17 +26,20 @@ const getPreviewList = async () => {
   // 遍历列表 获取预览图base64编码、桌宠基础信息
   response.forEach(async (el) => {
     const [
-      imageBase64,
+      imageBuffer,
       previewInfor
     ] = await Promise.all([
-      window.electron.ipcRenderer.invoke('get-image-base64', el.previewJpgPath),
+      window.electron.ipcRenderer.invoke('get-buffer', el.previewJpgPath),
       window.electron.ipcRenderer.invoke('get-json', el.previewJsonPath)
     ])
+
+    const imageBlob = new Blob([imageBuffer], { type: 'image/jpeg' });
+    const imageUrl = URL.createObjectURL(imageBlob);
 
     // 添加到视图层列表
     previewList.value.push({
       previewInfor: previewInfor,
-      previewJpgBase64: imageBase64,
+      previewJpgBlobUrl: imageUrl,
       petFilePath: el.petFilePath,
       windowId: null
     })
@@ -81,13 +84,20 @@ const startPet = async (petFilePath: string, previewInfor: PreviewInfor, index: 
 }
 
 
+// 释放图片blob
+const handleImageLoad = (url: string) => {
+  // 释放内存
+  URL.revokeObjectURL(url);
+}
+
+
 // 关闭桌宠窗口
 const stopPet = async (windowId: number, index: number) => {
   await window.electron.ipcRenderer.invoke('stop-pet', windowId);
   previewList.value[index].windowId = null
 }
 
-
+const value = ref(0)
 </script>
 
 <template>
@@ -95,7 +105,7 @@ const stopPet = async (windowId: number, index: number) => {
 
     <div class="manageItem" v-for="(item, index) in previewList">
 
-      <img :src="item.previewJpgBase64">
+      <img :src="item.previewJpgBlobUrl" @load="handleImageLoad(item.previewJpgBlobUrl)">
       <span>{{ item.previewInfor.name }}</span>
       <span>{{ item.previewInfor.infor }}</span>
       <span>位置：{{ getPosition(item.previewInfor.position) }}</span>
@@ -106,8 +116,12 @@ const stopPet = async (windowId: number, index: number) => {
       </div>
 
       <div class="operateBox">
-        <el-button type="danger" v-if="item.windowId" @click="stopPet(item.windowId, index)">关闭</el-button>
-        <el-button type="success" v-else @click="startPet(item.petFilePath, item.previewInfor, index)">启动</el-button>
+        <div class="buttonBox">
+          <el-button type="danger" v-if="item.windowId" @click="stopPet(item.windowId, index)">关闭桌宠</el-button>
+          <el-button type="success" v-else @click="startPet(item.petFilePath, item.previewInfor, index)">启动桌宠</el-button>
+          <el-button type="primary">记录位置</el-button>
+        </div>
+        <el-slider v-model="value" vertical height="200px" />
       </div>
 
 
@@ -199,6 +213,20 @@ const stopPet = async (windowId: number, index: number) => {
   align-items: center;
   opacity: 0;
   transition: all .25s;
+}
+
+.buttonBox {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+  margin-left: 18px;
+  gap: 16px;
+}
+
+.buttonBox>button {
+  margin: 0px;
 }
 
 .manageItem:hover>.operateBox {

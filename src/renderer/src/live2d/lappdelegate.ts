@@ -70,11 +70,11 @@ export class LAppDelegate {
    * @param live2dFolder  live2d文件夹名称
    * @param modelJsonName  live2d配置json文件名
    */
-  public initialize(petFilePath: string, live2dFolder: string, modelJsonName: string): boolean {
+  public initialize(petFilePath: string, live2dFolder: string, modelJsonName: string): { audioId: string, canvasId: string } | null {
 
     if (canvas == null || gl == null) {
       console.log('live2d画布获取失败');
-      return false
+      return null;
     }
 
     // 获取画布容器
@@ -82,21 +82,23 @@ export class LAppDelegate {
 
     if (canvasContainer === null) {
       console.log("容器获取失败");
-      return false
+      return null;
     }
 
 
     // 添加画布
+    const canvasId = `live2d_canvas_${live2dFolder}`;
     canvasContainer.appendChild(canvas);
-    canvas.setAttribute('id', 'live2d_canvas_wallpaper');
+    canvas.setAttribute('id', canvasId);
     // 将预先设定好的画布大小设置到画布
     canvas.width = canvasContainer.clientWidth;
     canvas.height = canvasContainer.clientHeight;
 
 
     // 添加音频播放器
+    const audioId = `${live2dFolder}audioPlayer`;
     const audioEelement = document.createElement('audio') as HTMLAudioElement;
-    audioEelement.setAttribute('id', `${live2dFolder}audioPlayer`);
+    audioEelement.setAttribute('id', audioId);
     audioEelement.style.display = 'none';
     canvasContainer.appendChild(audioEelement);
 
@@ -124,7 +126,10 @@ export class LAppDelegate {
     // Cubism SDKの初期化
     this.initializeCubism(petFilePath, live2dFolder, modelJsonName);
 
-    return true;
+    return {
+      audioId,
+      canvasId
+    };
   }
 
   /**

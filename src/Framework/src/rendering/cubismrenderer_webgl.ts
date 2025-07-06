@@ -12,7 +12,7 @@ import { csmVector } from '../type/csmvector';
 import { CubismLogError } from '../utils/cubismdebug';
 import { CubismClippingManager } from './cubismclippingmanager';
 import { CubismClippingContext, CubismRenderer } from './cubismrenderer';
-import { CubismShader_WebGL } from './cubismshader_webgl';
+import { CubismShaderManager_WebGL } from './cubismshader_webgl';
 
 let s_viewport: number[];
 let s_fbo: WebGLFramebuffer;
@@ -49,7 +49,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
       const size: number = this._clippingMaskBufferSize;
 
       for (let index = 0; index < this._renderTextureCount; index++) {
-        this._maskColorBuffers.pushBack(this.gl.createTexture()!); // 直接代入
+        this._maskColorBuffers.pushBack(this.gl.createTexture()); // 直接代入
         this.gl.bindTexture(
           this.gl.TEXTURE_2D,
           this._maskColorBuffers.at(index)
@@ -350,12 +350,12 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
     return this._clippingContextListForMask.getSize();
   }
 
-  public _currentMaskRenderTexture!: WebGLFramebuffer; // マスク用レンダーテクスチャのアドレス
-  public _maskRenderTextures!: csmVector<WebGLFramebuffer>; // レンダーテクスチャのリスト
-  public _maskColorBuffers!: csmVector<WebGLTexture>; // マスク用カラーバッファーのアドレスのリスト
-  public _currentFrameNo!: number; // マスクテクスチャに与えるフレーム番号
+  public _currentMaskRenderTexture: WebGLFramebuffer; // マスク用レンダーテクスチャのアドレス
+  public _maskRenderTextures: csmVector<WebGLFramebuffer>; // レンダーテクスチャのリスト
+  public _maskColorBuffers: csmVector<WebGLTexture>; // マスク用カラーバッファーのアドレスのリスト
+  public _currentFrameNo: number; // マスクテクスチャに与えるフレーム番号
 
-  public _maskTexture!: CubismRenderTextureResource; // マスク用のテクスチャリソースのリスト
+  public _maskTexture: CubismRenderTextureResource; // マスク用のテクスチャリソースのリスト
 
   gl: WebGLRenderingContext; // WebGLレンダリングコンテキスト
 }
@@ -857,17 +857,13 @@ export class CubismRenderer_WebGL extends CubismRenderer {
     this.gl.frontFace(this.gl.CCW); // Cubism SDK OpenGLはマスク・アートメッシュ共にCCWが表面
 
     if (this.isGeneratingMask()) {
-      CubismShader_WebGL.getInstance().setupShaderProgramForMask(
-        this,
-        model,
-        index
-      );
+      CubismShaderManager_WebGL.getInstance()
+        .getShader(this.gl)
+        .setupShaderProgramForMask(this, model, index);
     } else {
-      CubismShader_WebGL.getInstance().setupShaderProgramForDraw(
-        this,
-        model,
-        index
-      );
+      CubismShaderManager_WebGL.getInstance()
+        .getShader(this.gl)
+        .setupShaderProgramForDraw(this, model, index);
     }
 
     {
@@ -899,7 +895,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
    * WebGLの静的なシェーダープログラムを解放する
    */
   public static doStaticRelease(): void {
-    CubismShader_WebGL.deleteInstance();
+    CubismShaderManager_WebGL.deleteInstance();
   }
 
   /**
@@ -950,7 +946,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
   /**
    * マスクテクスチャに描画するクリッピングコンテキストをセットする
    */
-  public setClippingContextBufferForMask(clip: CubismClippingContext_WebGL | null) {
+  public setClippingContextBufferForMask(clip: CubismClippingContext_WebGL) {
     this._clippingContextBufferForMask = clip;
   }
 
@@ -997,7 +993,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
       this._clippingManager.setGL(gl);
     }
 
-    CubismShader_WebGL.getInstance().setGl(gl);
+    CubismShaderManager_WebGL.getInstance().setGlContext(gl);
     this._rendererProfile.setGl(gl);
 
     // 異方性フィルタリングが使用できるかチェック
@@ -1015,9 +1011,9 @@ export class CubismRenderer_WebGL extends CubismRenderer {
   _rendererProfile: CubismRendererProfile_WebGL;
   firstDraw: boolean;
   _bufferData: {
-    vertex: WebGLBuffer | null;
-    uv: WebGLBuffer | null;
-    index: WebGLBuffer | null;
+    vertex: WebGLBuffer;
+    uv: WebGLBuffer;
+    index: WebGLBuffer;
   }; // 頂点バッファデータ
   _extension: any; // 拡張機能
   gl: WebGLRenderingContext; // webglコンテキスト

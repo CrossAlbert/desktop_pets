@@ -1,5 +1,5 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, nativeImage } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, globalShortcut, ipcMain } from 'electron'
+import { join, normalize } from 'path'
 import fs from 'fs'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import type { } from '@shared/types'
@@ -51,25 +51,10 @@ app.whenReady().then(() => {
 
 
 
-  //获取图片编码 
-  ipcMain.handle('get-image-base64', async (_event, path: string) => {
-    try {
-      console.log(path);
-      const image = nativeImage.createFromPath(path);
-      return image.toDataURL();
-    } catch (error) {
-      console.log(error);
-      return null
-    }
-  });
-
-
-
   // 获取读取json
   ipcMain.handle('get-json', (_event, path: string) => {
     try {
-      console.log(path);
-      const data = fs.readFileSync(path, 'utf8');
+      const data = fs.readFileSync(normalize(path), 'utf8');
       return JSON.parse(data);
     } catch (error) {
       console.log(error);
@@ -82,8 +67,7 @@ app.whenReady().then(() => {
   // 获取文件字节流
   ipcMain.handle('get-buffer', (_event, path: string) => {
     try {
-      console.log(path);
-      const buf = fs.readFileSync(path);
+      const buf = fs.readFileSync(normalize(path));
       const buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
       return buffer;
     } catch (error) {

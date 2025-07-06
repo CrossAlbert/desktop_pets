@@ -1,7 +1,5 @@
-// import { CubismId, CubismIdHandle } from '../id/cubismid';
-// import { LogLevel, csmDelete } from '../live2dcubismframework';
-import { CubismIdHandle } from '../id/cubismid';
-import { csmDelete } from '../live2dcubismframework';
+import { CubismId, CubismIdHandle } from '../id/cubismid';
+import { LogLevel, csmDelete } from '../live2dcubismframework';
 import { CubismModel } from '../model/cubismmodel';
 import { csmVector, iterator } from '../type/csmvector';
 import { ACubismMotion } from './acubismmotion';
@@ -11,6 +9,7 @@ import {
   CubismMotionQueueEntryHandle,
   CubismMotionQueueManager
 } from './cubismmotionqueuemanager';
+import { CubismLogInfo } from '../utils/cubismdebug';
 
 /**
  * @brief パラメータに適用する表情の値を持たせる構造体
@@ -55,6 +54,9 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
   }
 
   /**
+   * @deprecated
+   * ExpressionではPriorityを使用していないため、この関数は非推奨となりました。
+   *
    * @brief 再生中のモーションの優先度の取得
    *
    * 再生中のモーションの優先度を取得する。
@@ -62,10 +64,16 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @returns モーションの優先度
    */
   public getCurrentPriority(): number {
+    CubismLogInfo(
+      'CubismExpressionMotionManager.getCurrentPriority() is deprecated because a priority value is not actually used during expression motion playback.'
+    );
     return this._currentPriority;
   }
 
   /**
+   * @deprecated
+   * ExpressionではPriorityを使用していないため、この関数は非推奨となりました。
+   *
    * @brief 予約中のモーションの優先度の取得
    *
    * 予約中のモーションの優先度を取得する。
@@ -73,6 +81,9 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @return  モーションの優先度
    */
   public getReservePriority(): number {
+    CubismLogInfo(
+      'CubismExpressionMotionManager.getReservePriority() is deprecated because a priority value is not actually used during expression motion playback.'
+    );
     return this._reservePriority;
   }
 
@@ -83,10 +94,45 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @returns               表情モーションのウェイト
    */
   public getFadeWeight(index: number): number {
+    if (
+      index < 0 ||
+      this._fadeWeights.getSize() < 1 ||
+      index >= this._fadeWeights.getSize()
+    ) {
+      console.warn(
+        'Failed to get the fade weight value. The element at that index does not exist.'
+      );
+      return -1;
+    }
+
     return this._fadeWeights.at(index);
   }
 
   /**
+   * @brief モーションのウェイトの設定。
+   *
+   * @param[in]    index    表情のインデックス
+   * @param[in]    index    表情モーションのウェイト
+   */
+  public setFadeWeight(index: number, expressionFadeWeight: number): void {
+    if (
+      index < 0 ||
+      this._fadeWeights.getSize() < 1 ||
+      this._fadeWeights.getSize() <= index
+    ) {
+      console.warn(
+        'Failed to set the fade weight value. The element at that index does not exist.'
+      );
+      return;
+    }
+
+    this._fadeWeights.set(index, expressionFadeWeight);
+  }
+
+  /**
+   * @deprecated
+   * ExpressionではPriorityを使用していないため、この関数は非推奨となりました。
+   *
    * @brief 予約中のモーションの優先度の設定
    *
    * 予約中のモーションの優先度を設定する。
@@ -94,30 +140,38 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @param[in]   priority     優先度
    */
   public setReservePriority(priority: number) {
+    CubismLogInfo(
+      'CubismExpressionMotionManager.setReservePriority() is deprecated because a priority value is not actually used during expression motion playback.'
+    );
     this._reservePriority = priority;
   }
 
   /**
+   * @deprecated
+   * ExpressionではPriorityを使用していないため、この関数は非推奨となりました。
+   * CubismExpressionMotionManager.startMotion() を使用してください。
+   *
    * @brief 優先度を設定してモーションの開始
    *
    * 優先度を設定してモーションを開始する。
    *
-   * @param[in]   motion          モーション 动作
-   * @param[in]   autoDelete      再生が終了したモーションのインスタンスを削除するならtrue 如果要删除已完成播放的运动实例，则为真
+   * @param[in]   motion          モーション
+   * @param[in]   autoDelete      再生が終了したモーションのインスタンスを削除するならtrue
    * @param[in]   priority        優先度
-   * @return                      開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するIsFinished()の引数で使用する。開始できない時は「-1」 返回已开始运动的标识号。用于确定单独的运动是否结束的IsFinished（）的参数。无法开始时为“-1”
+   * @return                      開始したモーションの識別番号を返す。個別のモーションが終了したか否かを判定するIsFinished()の引数で使用する。開始できない時は「-1」
    */
   public startMotionPriority(
     motion: ACubismMotion,
     autoDelete: boolean,
     priority: number
   ): CubismMotionQueueEntryHandle {
+    CubismLogInfo(
+      'CubismExpressionMotionManager.startMotionPriority() is deprecated because a priority value is not actually used during expression motion playback.'
+    );
     if (priority == this.getReservePriority()) {
       this.setReservePriority(0);
     }
     this._currentPriority = priority;
-
-    this._fadeWeights.pushBack(0.0);
 
     return this.startMotion(motion, autoDelete);
   }
@@ -139,6 +193,13 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
 
     let expressionWeight = 0.0;
     let expressionIndex = 0;
+
+    if (this._fadeWeights.getSize() !== motions.getSize()) {
+      const difference = motions.getSize() - this._fadeWeights.getSize();
+      for (let i = 0; i < difference; i++) {
+        this._fadeWeights.pushBack(0.0);
+      }
+    }
 
     // ------- 処理を行う --------
     // 既にモーションがあれば終了フラグを立てる
@@ -206,7 +267,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
         motionQueueEntry,
         this._userTimeSeconds
       );
-      this._fadeWeights.set(
+      this.setFadeWeight(
         expressionIndex,
         expressionMotion.updateFadeWeight(
           motionQueueEntry,
@@ -219,7 +280,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
         motionQueueEntry,
         this._expressionParameterValues,
         expressionIndex,
-        this._fadeWeights.at(expressionIndex)
+        this.getFadeWeight(expressionIndex)
       );
 
       expressionWeight +=
@@ -246,10 +307,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
 
     // ----- 最新のExpressionのフェードが完了していればそれ以前を削除する ------
     if (motions.getSize() > 1) {
-      const expressionMotion = <CubismExpressionMotion>(
-        motions.at(motions.getSize() - 1).getCubismMotion()
-      );
-      const latestFadeWeight: number = this._fadeWeights.at(
+      const latestFadeWeight: number = this.getFadeWeight(
         this._fadeWeights.getSize() - 1
       );
       if (latestFadeWeight >= 1.0) {
@@ -289,8 +347,8 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
 
   private _expressionParameterValues: csmVector<ExpressionParameterValue>; ///< モデルに適用する各パラメータの値
   private _fadeWeights: csmVector<number>; ///< 再生中の表情のウェイト
-  private _currentPriority: number; ///< 現在再生中のモーションの優先度
-  private _reservePriority: number; ///< 再生予定のモーションの優先度。再生中は0になる。モーションファイルを別スレッドで読み込むときの機能。
+  private _currentPriority: number; ///< @deprecated 現在再生中のモーションの優先度。Expressionでは使用しないため非推奨。
+  private _reservePriority: number; ///< @deprecated 再生予定のモーションの優先度。再生中は0になる。モーションファイルを別スレッドで読み込むときの機能。Expressionでは使用しないため非推奨。
   private _startExpressionTime: number; ///< 表情の再生開始時刻
 }
 

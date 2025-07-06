@@ -17,7 +17,7 @@ export class CubismString {
     return ret.replace(
       /\{(\d+)\}/g,
       (
-        _m,
+        m,
         k // m="{0}", k="0"
       ) => {
         return args[k];

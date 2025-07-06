@@ -67,8 +67,8 @@ export abstract class Value {
   /**
    * 要素を配列で返す(Value[])
    */
-  public getArray(defaultValue: Value[] | null = null): Value[] {
-    return defaultValue!;
+  public getArray(defaultValue: Value[] = null): Value[] {
+    return defaultValue;
   }
 
   /**
@@ -82,13 +82,13 @@ export abstract class Value {
    * 要素をマップで返す(csmMap<csmString, Value>)
    */
   public getMap(defaultValue?: csmMap<string, Value>): csmMap<string, Value> {
-    return defaultValue!;
+    return defaultValue;
   }
 
   /**
    * 添字演算子[index]
    */
-  public getValueByIndex(_index: number): Value {
+  public getValueByIndex(index: number): Value {
     return Value.errorValue.setErrorNotForClientCall(
       CSM_JSON_ERROR_TYPE_MISMATCH
     );
@@ -168,7 +168,7 @@ export abstract class Value {
   public equals(value: string): boolean;
   public equals(value: number): boolean;
   public equals(value: boolean): boolean;
-  public equals(_value: any): boolean {
+  public equals(value: any): boolean {
     return false;
   }
 
@@ -208,12 +208,12 @@ export abstract class Value {
     Value.dummyKeys = null;
   }
 
-  protected _stringBuffer!: string; // 文字列バッファ
+  protected _stringBuffer: string; // 文字列バッファ
 
-  private static dummyKeys: csmVector<string> | null; // ダミーキー
+  private static dummyKeys: csmVector<string>; // ダミーキー
 
-  public static errorValue: Value | null; // 一時的な返り値として返すエラー。 CubismFramework::Disposeするまではdeleteしない
-  public static nullValue: Value | null; // 一時的な返り値として返すNULL。   CubismFramework::Disposeするまではdeleteしない
+  public static errorValue: Value; // 一時的な返り値として返すエラー。 CubismFramework::Disposeするまではdeleteしない
+  public static nullValue: Value; // 一時的な返り値として返すNULL。   CubismFramework::Disposeするまではdeleteしない
 
   [key: string]: any; // 明示的に連想配列をany型で指定
 }
@@ -565,7 +565,7 @@ export class CubismJson {
     length: number,
     begin: number,
     outEndPos: number[]
-  ): Value | null {
+  ): Value {
     if (this._error) {
       return null;
     }
@@ -647,7 +647,7 @@ export class CubismJson {
       }
 
       // 値をチェック
-      const value: Value = this.parseValue(buffer, length, i, localRetEndPos2)!;
+      const value: Value = this.parseValue(buffer, length, i, localRetEndPos2);
       if (this._error) {
         return null;
       }
@@ -692,7 +692,7 @@ export class CubismJson {
     length: number,
     begin: number,
     outEndPos: number[]
-  ): Value | null{
+  ): Value {
     if (this._error) {
       return null;
     }
@@ -702,7 +702,7 @@ export class CubismJson {
       return null;
     }
 
-    let ret: JsonArray | null = new JsonArray();
+    let ret: JsonArray = new JsonArray();
 
     // key : value
     let i: number = begin;
@@ -712,7 +712,7 @@ export class CubismJson {
     // , が続く限りループ
     for (; i < length; i++) {
       // : をチェック
-      const value: Value = this.parseValue(buffer, length, i, localRetEndpos2)!;
+      const value: Value = this.parseValue(buffer, length, i, localRetEndpos2);
 
       if (this._error) {
         return null;
@@ -746,16 +746,16 @@ export class CubismJson {
       }
     }
 
-    ret = null;
+    ret = void 0;
     this._error = 'illegal end of parseObject';
     return null;
   }
 
   _parseCallback: parseJsonObject = CubismJsonExtension.parseJsonObject; // パース時に使う処理のコールバック関数
 
-  _error: string | null; // パース時のエラー
+  _error: string; // パース時のエラー
   _lineCount: number; // エラー報告に用いる行数カウント
-  _root: Value | null; // パースされたルート要素
+  _root: Value; // パースされたルート要素
 }
 
 interface parseJsonObject {
@@ -785,7 +785,7 @@ export class JsonFloat extends Value {
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, _indent: string): string {
+  public getString(defaultValue: string, indent: string): string {
     const strbuf = '\0';
     this._value = parseFloat(strbuf);
     this._stringBuffer = strbuf;
@@ -796,14 +796,14 @@ export class JsonFloat extends Value {
   /**
    * 要素を数値型で返す(number)
    */
-  public toInt(_defaultValue = 0): number {
+  public toInt(defaultValue = 0): number {
     return parseInt(this._value.toString());
   }
 
   /**
    * 要素を数値型で返す(number)
    */
-  public toFloat(_defaultValue = 0.0): number {
+  public toFloat(defaultValue = 0.0): number {
     return this._value;
   }
 
@@ -845,14 +845,14 @@ export class JsonBoolean extends Value {
   /**
    * 要素を真偽値で返す(boolean)
    */
-  public toBoolean(_defaultValue = false): boolean {
+  public toBoolean(defaultValue = false): boolean {
     return this._boolValue;
   }
 
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, _indent: string): string {
+  public getString(defaultValue: string, indent: string): string {
     this._stringBuffer = this._boolValue ? 'true' : 'false';
 
     return this._stringBuffer;
@@ -925,7 +925,7 @@ export class JsonString extends Value {
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, _indent: string): string {
+  public getString(defaultValue: string, indent: string): string {
     return this._stringBuffer;
   }
 
@@ -1004,7 +1004,7 @@ export class JsonNullvalue extends Value {
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, _indent: string): string {
+  public getString(defaultValue: string, indent: string): string {
     return this._stringBuffer;
   }
 
@@ -1054,10 +1054,10 @@ export class JsonArray extends Value {
       ite.notEqual(this._array.end());
       ite.preIncrement()
     ) {
-      let v: Value | null = ite.ptr();
+      let v: Value = ite.ptr();
 
       if (v && !v.isStatic()) {
-        // v = void 0;
+        v = void 0;
         v = null;
       }
     }
@@ -1092,7 +1092,7 @@ export class JsonArray extends Value {
   /**
    * 添字演算子[string | csmString]
    */
-  public getValueByString(_s: string | csmString): Value {
+  public getValueByString(s: string | csmString): Value {
     return Value.errorValue.setErrorNotForClientCall(
       CSM_JSON_ERROR_TYPE_MISMATCH
     );
@@ -1101,7 +1101,7 @@ export class JsonArray extends Value {
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, indent: string): string {
+  public getString(defaultValue: string, indent: string): string {
     const stringBuffer: string = indent + '[\n';
 
     for (
@@ -1129,7 +1129,7 @@ export class JsonArray extends Value {
   /**
    * 要素をコンテナで返す(csmVector<Value>)
    */
-  public getVector(_defaultValue: csmVector<Value> | null = null): csmVector<Value> {
+  public getVector(defaultValue: csmVector<Value> = null): csmVector<Value> {
     return this._array;
   }
 
@@ -1162,10 +1162,10 @@ export class JsonMap extends Value {
     const ite: csmMap_iterator<string, Value> = this._map.begin();
 
     while (ite.notEqual(this._map.end())) {
-      let v: Value | null = ite.ptr().second;
+      let v: Value = ite.ptr().second;
 
       if (v && !v.isStatic()) {
-        // v = void 0;
+        v = void 0;
         v = null;
       }
 
@@ -1211,8 +1211,8 @@ export class JsonMap extends Value {
   /**
    * 添字演算子[index]
    */
-  public getValueByIndex(_index: number): Value {
-    return Value.errorValue!.setErrorNotForClientCall(
+  public getValueByIndex(index: number): Value {
+    return Value.errorValue.setErrorNotForClientCall(
       CSM_JSON_ERROR_TYPE_MISMATCH
     );
   }
@@ -1220,7 +1220,7 @@ export class JsonMap extends Value {
   /**
    * 要素を文字列で返す(csmString型)
    */
-  public getString(_defaultValue: string, indent: string) {
+  public getString(defaultValue: string, indent: string) {
     this._stringBuffer = indent + '{\n';
 
     const ite: csmMap_iterator<string, Value> = this._map.begin();
@@ -1241,7 +1241,7 @@ export class JsonMap extends Value {
   /**
    * 要素をMap型で返す
    */
-  public getMap(_defaultValue?: csmMap<string, Value>): csmMap<string, Value> {
+  public getMap(defaultValue?: csmMap<string, Value>): csmMap<string, Value> {
     return this._map;
   }
 
@@ -1278,7 +1278,7 @@ export class JsonMap extends Value {
   }
 
   private _map: csmMap<string, Value>; // JSON要素の値
-  private _keys!: csmVector<string>; // JSON要素の値
+  private _keys: csmVector<string>; // JSON要素の値
 }
 
 // Namespace definition for compatibility.

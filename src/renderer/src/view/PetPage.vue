@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaskBox from '@renderer/components/MaskBox.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import live2d from '../live2d/main';
 import { useRoute } from 'vue-router';
@@ -30,7 +31,7 @@ const mouseupHandle = (e: MouseEvent) => {
 
 // 移动窗口
 const mousemoveHandle = (e: MouseEvent) => {
-    if (dragFlag.value && e.button === 2) {
+    if (dragFlag.value) {
         const deltaX = e.screenX - startX;
         const deltaY = e.screenY - startY;
         window.electron.ipcRenderer.send('move-window', deltaX, deltaY);
@@ -39,6 +40,8 @@ const mousemoveHandle = (e: MouseEvent) => {
     }
 }
 
+let audioIdLocal: string | null = null;
+let canvasIdLocal: string | null = null;
 
 onMounted(() => {
     const {
@@ -47,7 +50,11 @@ onMounted(() => {
         modelJsonName
     } = route.params as unknown as PreviewInforIpc;
     // 开启实例
-    live2d.live2dStart(petFilePath, live2dFolder, modelJsonName);
+    const result = live2d.live2dStart(petFilePath, live2dFolder, modelJsonName);
+    if (result) {
+        audioIdLocal = result.audioId
+        canvasIdLocal = result.canvasId
+    }
     // 添加右键监听 用于拖动窗口
     document.addEventListener('mousedown', mousedownHandle);
     document.addEventListener('mouseup', mouseupHandle);
@@ -57,7 +64,8 @@ onMounted(() => {
 
 onUnmounted(() => {
     // 关闭sdk 
-    live2d.live2dEnd();
+    
+    live2d.live2dEnd(canvasIdLocal, audioIdLocal);
     document.removeEventListener('mousedown', mousedownHandle);
     document.removeEventListener('mouseup', mouseupHandle);
     document.removeEventListener('mousemove', mousemoveHandle);
@@ -74,6 +82,7 @@ onUnmounted(() => {
 
 <template>
     <div class="petHome">
+        <MaskBox v-if="dragFlag"></MaskBox>
         <!-- 语音文字框 -->
         <div id="text_container"></div>
         <!-- live2d画布容器 -->
@@ -89,13 +98,13 @@ onUnmounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #303133;
 }
 </style>
 
 
 <style>
 #canvas_container {
+    flex-shrink: 0;
     width: 200%;
     height: 200%;
     transform: scale(0.5);

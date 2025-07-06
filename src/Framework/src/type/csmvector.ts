@@ -11,7 +11,7 @@
 export class csmVector<T> {
   /**
    * 引数付きコンストラクタ
-   * @param iniitalCapacity 初始化后的容量。数据大小为_capacity*sizeof（T）
+   * @param iniitalCapacity 初期化後のキャパシティ。データサイズは_capacity * sizeof(T)
    * @param zeroClear trueなら初期化時に確保した領域を0で埋める
    */
   constructor(initialCapacity = 0) {
@@ -38,7 +38,7 @@ export class csmVector<T> {
    * @param index 要素をセットするインデックス
    * @param value セットする要素
    */
-  public set(index: number, value: T | null): void {
+  public set(index: number, value: T): void {
     this._ptr[index] = value;
   }
 
@@ -54,7 +54,7 @@ export class csmVector<T> {
   }
 
   /**
-   * pushBack处理，向容器添加新元素
+   * pushBack処理、コンテナに新たな要素を追加する
    * @param value PushBack処理で追加する値
    */
   public pushBack(value: T): void {
@@ -257,7 +257,7 @@ export class csmVector<T> {
     return newVector;
   }
 
-  _ptr: T[]; // コンテナの先頭アドレス 容器的起始地址
+  _ptr: T[]; // コンテナの先頭アドレス
   _size: number; // コンテナの要素数
   _capacity: number; // コンテナのキャパシティ
 
@@ -268,7 +268,7 @@ export class iterator<T> {
   /**
    * コンストラクタ
    */
-  public constructor(v?: csmVector<T> | null, index?: number) {
+  public constructor(v?: csmVector<T>, index?: number) {
     this._vector = v != undefined ? v : null;
     this._index = index != undefined ? index : 0;
   }

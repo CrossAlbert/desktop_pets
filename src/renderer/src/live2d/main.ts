@@ -16,20 +16,21 @@ import { LAppGlManager } from './lappglmanager';
  * @param live2dFolder  live2d文件夹名称
  * @param modelJsonName  live2d配置json文件名
  */
-const live2dStart = (petFilePath: string, live2dFolder: string, modelJsonName: string): void => {
+const live2dStart = (petFilePath: string, live2dFolder: string, modelJsonName: string): { audioId: string, canvasId: string } | null => {
 
-  // 判断所需实例创建是否正常，如有问题 结束
-  if (
-    // 获取WebGL实例
-    !LAppGlManager.getInstance() ||
-    // 获取Cubism SDK应用程序类，并 
-    // 初始化画布大小 判断绑定触摸/点击函数， 进行webgl相关设置， 视图容器设置， SDKの初期化
-    !LAppDelegate.getInstance().initialize(petFilePath, live2dFolder, modelJsonName)
-  ) {
-    return
+  // 获取WebGL实例
+  const result = LAppGlManager.getInstance()
+  // 获取Cubism SDK应用程序类，并 初始化画布大小 判断绑定触摸/点击函数，绑定音频播放器， 进行webgl相关设置， 视图容器设置， SDKの初期化
+  const idResult = LAppDelegate.getInstance().initialize(petFilePath, live2dFolder, modelJsonName);
+
+  // 判断所需实例创建是否正常
+  if (idResult && result) {
+    LAppDelegate.getInstance().run();
+    return idResult
+  } else {
+    return null
   }
 
-  LAppDelegate.getInstance().run();
 }
 
 
@@ -37,7 +38,11 @@ const live2dStart = (petFilePath: string, live2dFolder: string, modelJsonName: s
 /**
  * 終了時の処理
  */
-const live2dEnd = (): void => LAppDelegate.releaseInstance()
+const live2dEnd = (canvasId: any, audioId: any): void => {
+  LAppDelegate.releaseInstance();
+  document.getElementById(canvasId)?.remove();
+  document.getElementById(audioId)?.remove();
+}
 
 
 /**

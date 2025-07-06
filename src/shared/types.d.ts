@@ -34,6 +34,12 @@ declare global {
     infor: string,
     // 位置 random为自动移动 | 固定位置
     position: 'random' | { x: number, y: number }
+    // 窗口尺寸
+    size: {
+      width: number, height: number
+    }
+    // 音量
+    volume: number
     // live2d文件夹名称
     live2dFolder: string
     // live2d配置json文件名
@@ -52,10 +58,10 @@ declare global {
   /**
    * 桌宠页面创建后返回的信息
    */
-  type PetWindowInfor = { 
-    windowId: number 
+  type PetWindowInfor = {
+    windowId: number
     windowWidth: number
-    windowHeight: number 
+    windowHeight: number
   }
 
 

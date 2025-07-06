@@ -38,58 +38,47 @@ declare namespace Live2DCubismCore {
     interface csmLogFunction {
         (message: string): void;
     }
-
-    /** Cubism version. moc版本。*/
+    /** Cubism version. */
     class Version {
         /**
          * Queries Core version.
-         * 查询Core版本。
          *
          * @return Core version.
-         * 返回版本号
          */
         static csmGetVersion(): csmVersion;
         /**
          * Gets Moc file supported latest version.
-         * 获取支持的Moc文件的最新版本。
          *
          * @return Moc file latest format version.
-         * Moc文件的最新格式版本。
          */
         static csmGetLatestMocVersion(): csmMocVersion;
         /**
          * Gets Moc file format version.
-         * 获取Moc文件格式版本。
          *
          * @param moc Moc
          *
          * @return csmMocVersion
-         * csm-Moc版本
          */
         static csmGetMocVersion(moc: Moc, mocBytes: ArrayBuffer): csmMocVersion;
         private constructor();
     }
-
-    /** Cubism logging. 日志*/
+    /** Cubism logging. */
     class Logging {
         private static logFunction;
         /**
          * Sets log handler.
-         * 设置日志处理程序。
          *
          * @param handler  Handler to use.
          */
         static csmSetLogFunction(handler: csmLogFunction): void;
         /**
          * Queries log handler.
-         * 查询日志处理程序。
          *
          * @return Log handler.
          */
         static csmGetLogFunction(): csmLogFunction;
         /**
          * Wrap log function.
-         * 包装日志函数
          *
          * @param messagePtr number
          *
@@ -98,44 +87,34 @@ declare namespace Live2DCubismCore {
         private static wrapLogFunction;
         private constructor();
     }
-
-    /** Cubism moc. moc文件从字节流转为可执行moc*/
+    /** Cubism moc. */
     class Moc {
         /**
          * Checks consistency of a moc.
-         * 检查moc的一致性。
          *
          * @param mocBytes Moc bytes.
          *
          * @returns '1' if Moc is valid; '0' otherwise.
          */
         hasMocConsistency(mocBytes: ArrayBuffer): number;
-
         /** Creates [[Moc]] from [[ArrayBuffer]].
-         * 从[[ArrayBuffer]]创建[[Moc]]。
          *
          * @param buffer Array buffer
-         * 二进制流
          *
          * @return [[Moc]] on success; [[null]] otherwise.
-         * 成功返回moc文件 否则返回null
          */
         static fromArrayBuffer(buffer: ArrayBuffer): Moc;
-
-        /** Releases instance. 返回实例*/
+        /** Releases instance. */
         _release(): void;
         /** Native moc. */
         _ptr: number;
         /**
          * Initializes instance.
-         * 初始化实例。
          *
          * @param mocBytes Moc bytes.
          */
         private constructor();
     }
-
-
     /** Cubism model. */
     class Model {
         /** Parameters. */
@@ -148,75 +127,45 @@ declare namespace Live2DCubismCore {
         canvasinfo: CanvasInfo;
         /**
          * Creates [[Model]] from [[Moc]].
-         * 从[[Moc]]创建[[Model]]。
          *
          * @param moc Moc
          *
          * @return [[Model]] on success; [[null]] otherwise.
-         * 成功返回模型 失败返回null
          */
         static fromMoc(moc: Moc): Model;
-
-        /** Updates instance. 更新实例。*/
+        /** Updates instance. */
         update(): void;
-        /** Releases instance. 返回实例。*/
+        /** Releases instance. */
         release(): void;
         /** Native model. */
         _ptr: number;
         /**
          * Initializes instance.
-         * 实例初始化参数需要 moc文件
+         *
          * @param moc Moc
          */
         private constructor();
     }
-
-    /** 
-     * model类参数 画布初始化信息
-     * Canvas information interface. 
-     * */
+    /** Canvas information interface. */
     class CanvasInfo {
-        /** 
-         * Width of native model canvas. 
-         * 本机模型画布的宽度。
-        */
+        /** Width of native model canvas. */
         CanvasWidth: number;
-        /** 
-         * Height of native model canvas. 
-         * 本地模型画布的高度。
-         * */
+        /** Height of native model canvas. */
         CanvasHeight: number;
-        /** 
-         * Coordinate origin of X axis. 
-         * X轴的坐标原点。
-         */
+        /** Coordinate origin of X axis. */
         CanvasOriginX: number;
-        /** 
-         * Coordinate origin of Y axis. 
-         * Y轴的坐标原点。
-         */
+        /** Coordinate origin of Y axis. */
         CanvasOriginY: number;
-        /** 
-         * Pixels per unit of native model. 
-         * 每单位原生模型的像素数。
-         */
+        /** Pixels per unit of native model. */
         PixelsPerUnit: number;
-
         /**
          * Initializes instance.
-         * 初始化实例。
          *
-         * 本机模型指针。
          * @param modelPtr Native model pointer.
          */
         constructor(modelPtr: number);
     }
-
-
-    /**
-     * model类参数
-     *  Cubism model parameters 
-     * */
+    /** Cubism model parameters */
     class Parameters {
         /** Parameter count. */
         count: number;
@@ -232,6 +181,8 @@ declare namespace Live2DCubismCore {
         defaultValues: Float32Array;
         /** Parameter values. */
         values: Float32Array;
+        /** Parameter Repeat informations. */
+        repeats: Int32Array;
         /** Number of key values of each parameter. */
         keyCounts: Int32Array;
         /** Key values of each parameter. */
@@ -243,12 +194,7 @@ declare namespace Live2DCubismCore {
          */
         constructor(modelPtr: number);
     }
-
-
-    /** 
-     * model类参数
-     * Cubism model parts 
-     * */
+    /** Cubism model parts */
     class Parts {
         /** Part count. */
         count: number;
@@ -265,12 +211,7 @@ declare namespace Live2DCubismCore {
          */
         constructor(modelPtr: number);
     }
-
-    
-    /** 
-     * model类参数
-     * Cubism model drawables 
-     * */
+    /** Cubism model drawables */
     class Drawables {
         /** Drawable count. */
         count: number;
@@ -319,16 +260,12 @@ declare namespace Live2DCubismCore {
          */
         constructor(modelPtr: number);
     }
-
-
-    /** Utility functions. 实用程序功能。*/
+    /** Utility functions. */
     class Utils {
         /**
          * Checks whether flag is set in bitfield.
-         * 检查位字段中是否设置了标志。
          *
          * @param bitfield Bitfield to query against.
-         * 要查询的位字段。
          *
          * @return [[true]] if bit set; [[false]] otherwise
         */
@@ -414,9 +351,7 @@ declare namespace Live2DCubismCore {
         */
         static hasBlendColorDidChangeBit(bitfield: number): boolean;
     }
-
-
-    /** Memory functions. 内存分配*/
+    /** Memory functions. */
     class Memory {
         /**
          * HACK:

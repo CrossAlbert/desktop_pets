@@ -14,7 +14,6 @@ import {
 } from './utils/cubismdebug';
 import { Value } from './utils/cubismjson';
 
-
 export function strtod(s: string, endPtr: string[]): number {
   let index = 0;
   for (let i = 1; ; i++) {
@@ -49,8 +48,8 @@ export function strtod(s: string, endPtr: string[]): number {
 
 let s_isStarted = false;
 let s_isInitialized = false;
-let s_option: Option | null= null;
-let s_cubismIdManager: CubismIdManager | null = null;
+let s_option: Option = null;
+let s_cubismIdManager: CubismIdManager = null;
 
 /**
  * Framework内で使う定数の宣言
@@ -60,7 +59,7 @@ export const Constant = Object.freeze<Record<string, number>>({
   vertexStep: 2 // メッシュ頂点のステップ値
 });
 
-export function csmDelete<T>(address: T | any): void {
+export function csmDelete<T>(address: T): void {
   if (!address) {
     return;
   }
@@ -71,10 +70,6 @@ export function csmDelete<T>(address: T | any): void {
 /**
  * Live2D Cubism SDK Original Workflow SDKのエントリポイント
  * 利用開始時はCubismFramework.initialize()を呼び、CubismFramework.dispose()で終了する。
- * 
- * 
- * Live 2D Cubism SDK Original Workflow SDK的入口点
- * 开始使用时，初始化类 CubismFramework.initialize（），使用 CubismFramework.dispose（）销毁实例。
  */
 export class CubismFramework {
   /**
@@ -82,23 +77,11 @@ export class CubismFramework {
    *  APIを実行する前に必ずこの関数を実行すること。
    *  一度準備が完了して以降は、再び実行しても内部処理がスキップされます。
    *
-   * 
-   * 
-   * 启用Cubism框架API。
-   * 获取实例后请立刻使用
-   * 必须在运行API之前运行此函数。
-   * 一旦准备就绪，即使再次运行，内部处理也会被跳过。
-   *  
-   * 
-   * 选项类实例
    * @param    option      Optionクラスのインスタンス
    *
-   * 
-   * 准备处理完成后返回true
    * @return   準備処理が完了したらtrueが返ります。
    */
-
-  public static startUp(option: Option | null = null): boolean {
+  public static startUp(option: Option = null): boolean {
     if (s_isStarted) {
       CubismLogInfo('CubismFramework.startUp() is already done.');
       return s_isStarted;
@@ -137,10 +120,6 @@ export class CubismFramework {
   /**
    * StartUp()で初期化したCubismFrameworkの各パラメータをクリアします。
    * Dispose()したCubismFrameworkを再利用する際に利用してください。
-   * 
-   * 
-   * 清除在StartUp（）中初始化的CubismFramework中的每个参数。
-   * 用于重新使用Dispose（）的CubismFramework。
    */
   public static cleanUp(): void {
     s_isStarted = false;
@@ -149,29 +128,14 @@ export class CubismFramework {
     s_cubismIdManager = null;
   }
 
-
   /**
-   * Cubism Framework内のリソースを初期化してモデルを表示可能な状態にします。
-   * 再度Initialize()するには先にDispose()を実行する必要があります。
-   * 
-   * 
-   * 初始化Cubism框架中的资源，使模型处于可见状态。
-   * 再次初始化时 必须先运行Dispose（）。
+   * Cubism Framework内のリソースを初期化してモデルを表示可能な状態にします。<br>
+   *     再度Initialize()するには先にDispose()を実行する必要があります。
    *
-   * 
-   * 
-   * @param memorySize 
-   * 初始化内存大小
-   * 在显示多个模型时等不更新模型时使用。
-   * 指定时必须指定1024*1024*16byte（16MB）以上的值。
-   * 除此之外全部揉成1024*1024*16byte。
-   * 
-   * 
-   * 
-   * 初期化時メモリ量 [byte(s)]
-   * 複数モデル表示時などにモデルが更新されない際に使用してください。
-   * 指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してください。
-   * それ以外はすべて1024*1024*16 byteに丸めます。
+   * @param memorySize 初期化時メモリ量 [byte(s)]
+   *    複数モデル表示時などにモデルが更新されない際に使用してください。
+   *    指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してください。
+   *    それ以外はすべて1024*1024*16 byteに丸めます。
    */
   public static initialize(memorySize = 0): void {
     CSM_ASSERT(s_isStarted);
@@ -207,14 +171,9 @@ export class CubismFramework {
   }
 
   /**
-   * 释放Cubism框架中的所有资源。
-   * 但是，不释放外部资源。
-   * 必须在外部适当销毁。
-   * 
-   * 
    * Cubism Framework内の全てのリソースを解放します。
-   * ただし、外部で確保されたリソースについては解放しません。
-   * 外部で適切に破棄する必要があります。
+   *      ただし、外部で確保されたリソースについては解放しません。
+   *      外部で適切に破棄する必要があります。
    */
   public static dispose(): void {
     CSM_ASSERT(s_isStarted);
@@ -233,7 +192,7 @@ export class CubismFramework {
 
     Value.staticReleaseNotForClientCall();
 
-    s_cubismIdManager!.release();
+    s_cubismIdManager.release();
     s_cubismIdManager = null;
 
     // レンダラの静的リソース（シェーダプログラム他）を解放する
@@ -244,12 +203,7 @@ export class CubismFramework {
     CubismLogInfo('CubismFramework.dispose() is complete.');
   }
 
-
-
   /**
-   * 是否已准备好使用Cubism框架API
-   * 如果已准备好使用API，则返回真值。
-   * 
    * Cubism FrameworkのAPIを使用する準備が完了したかどうか
    * @return APIを使用する準備が完了していればtrueが返ります。
    */
@@ -257,11 +211,7 @@ export class CubismFramework {
     return s_isStarted;
   }
 
-
   /**
-   * 是否已初始化Cubism框架资源
-   * 如果已准备好，则返回真值。
-   * 
    * Cubism Frameworkのリソース初期化がすでに行われているかどうか
    * @return リソース確保が完了していればtrueが返ります
    */
@@ -269,10 +219,9 @@ export class CubismFramework {
     return s_isInitialized;
   }
 
-
   /**
-   * 运行绑定到核心API的日志函数
    * Core APIにバインドしたログ関数を実行する
+   *
    * @praram message ログメッセージ
    */
   public static coreLogFunction(message: string): void {
@@ -284,10 +233,9 @@ export class CubismFramework {
     Live2DCubismCore.Logging.csmGetLogFunction()(message);
   }
 
-
   /**
-   * 返回当前日志输出级别设置的值。
    * 現在のログ出力レベル設定の値を返す。
+   *
    * @return  現在のログ出力レベル設定の値
    */
   public static getLoggingLevel(): LogLevel {
@@ -297,22 +245,15 @@ export class CubismFramework {
     return LogLevel.LogLevel_Off;
   }
 
-
   /**
-   * 获取标识管理器实例
-   * 返回CubismManager类实例
-   * 
    * IDマネージャのインスタンスを取得する
    * @return CubismManagerクラスのインスタンス
    */
   public static getIdManager(): CubismIdManager {
-    return s_cubismIdManager!;
+    return s_cubismIdManager;
   }
 
   /**
-   * 用作静态类
-   * 不实例化
-   * 
    * 静的クラスとして使用する
    * インスタンス化させない
    */
@@ -320,8 +261,8 @@ export class CubismFramework {
 }
 
 export class Option {
-  logFunction!: Live2DCubismCore.csmLogFunction; // 日志输出函数对象
-  loggingLevel!: LogLevel; // 设置日志输出级别
+  logFunction: Live2DCubismCore.csmLogFunction; // ログ出力の関数オブジェクト
+  loggingLevel: LogLevel; // ログ出力レベルの設定
 }
 
 /**

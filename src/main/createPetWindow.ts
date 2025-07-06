@@ -2,13 +2,16 @@ import { shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import setDesktopChild from '../setDesktopChild/Release/setDesktopChild.node'
 
 // 创建桌宠窗口
 const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
     // 创建浏览器窗口
     const petWindow = new BrowserWindow({
-        width: 900,
-        height: 670,
+        width: infor.size.width,
+        height: infor.size.height,
+        // x:1500,
+        // y:300,
         show: false,
         // 应用程序菜单栏将自动隐藏
         autoHideMenuBar: true,
@@ -80,10 +83,16 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
         petWindow.webContents.send('select-router', routerMessage)
     });
 
+    // 获取句柄
+    const hwndBuffer = petWindow.getNativeWindowHandle()
+    const hwndEec = hwndBuffer.readUInt32LE(0)
+    // 将窗口置于桌面内作为子窗口
+    setDesktopChild.setDesktopChild(hwndEec)
+
     return {
         windowId: petWindow.id,
-        windowWidth: 900,
-        windowHeight: 670,
+        windowWidth: 400,
+        windowHeight: 700,
     }
 
 }

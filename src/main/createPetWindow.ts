@@ -1,4 +1,4 @@
-import { shell, BrowserWindow } from 'electron'
+import { shell, BrowserWindow, BrowserWindowConstructorOptions } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -6,12 +6,9 @@ import setDesktopChild from '../setDesktopChild/Release/setDesktopChild.node'
 
 // 创建桌宠窗口
 const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
-    // 创建浏览器窗口
-    const petWindow = new BrowserWindow({
+    const options:BrowserWindowConstructorOptions = {
         width: infor.size.width,
         height: infor.size.height,
-        // x:1500,
-        // y:300,
         show: false,
         // 应用程序菜单栏将自动隐藏
         autoHideMenuBar: true,
@@ -30,7 +27,18 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
             preload: join(__dirname, '../preload/index.js'),
             sandbox: false
         }
-    })
+    }
+
+    
+    // 判断是否有预设位置
+    if ( infor.position.x !== -100000 && infor.position.y !== -100000 ) {
+        options.x = infor.position.x
+        options.y = infor.position.y
+    }
+
+
+    // 创建浏览器窗口
+    const petWindow = new BrowserWindow(options)
 
 
     petWindow.on('ready-to-show', () => {
@@ -76,7 +84,8 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
                 name: infor.name,
                 petFilePath: infor.petFilePath,
                 live2dFolder: infor.live2dFolder,
-                modelJsonName: infor.modelJsonName
+                modelJsonName: infor.modelJsonName,
+                volume:infor.volume
             }
         }
         // 发送信号切换路由到控制页面
@@ -91,8 +100,8 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
 
     return {
         windowId: petWindow.id,
-        windowWidth: 400,
-        windowHeight: 700,
+        windowWidth: infor.size.width,
+        windowHeight: infor.size.height
     }
 
 }

@@ -11,7 +11,7 @@ const router = createRouter({
       component: ManagePages,
     },
     {
-      path: '/pet/:name/:petFilePath/:live2dFolder/:modelJsonName',
+      path: '/pet/:name/:petFilePath/:live2dFolder/:modelJsonName/:volume',
       name: 'pet',
       component: PetPage,
     }

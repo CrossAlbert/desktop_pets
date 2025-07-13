@@ -5,7 +5,7 @@ import icon from '../../resources/icon.png?asset'
 
 
 // 创建管理窗口
-const createManageWindow = (): void => {
+const createManageWindow = (): number => {
     // 创建浏览器窗口
     const manageWindow = new BrowserWindow({
         width: 900,
@@ -69,6 +69,7 @@ const createManageWindow = (): void => {
     });
 
 
+    return manageWindow.id
 
 }
 

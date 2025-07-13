@@ -28,12 +28,13 @@ declare global {
    * 从文件夹读取的预览json内存储的必要信息
    */
   type PreviewInfor = {
+    id:string
     // 名称
     name: string
     // 版本信息
     infor: string,
     // 位置 random为自动移动 | 固定位置
-    position: 'random' | { x: number, y: number }
+    position: { x: number, y: number }
     // 窗口尺寸
     size: {
       width: number, height: number
@@ -44,6 +45,8 @@ declare global {
     live2dFolder: string
     // live2d配置json文件名
     modelJsonName: string
+    // 是否自启
+    selfStart:boolean
   }
 
 

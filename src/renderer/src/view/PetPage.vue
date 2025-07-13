@@ -47,7 +47,8 @@ onMounted(() => {
     const {
         petFilePath,
         live2dFolder,
-        modelJsonName
+        modelJsonName,
+        volume
     } = route.params as unknown as PreviewInforIpc;
     // 开启实例
     const result = live2d.live2dStart(petFilePath, live2dFolder, modelJsonName);
@@ -55,16 +56,18 @@ onMounted(() => {
         audioIdLocal = result.audioId
         canvasIdLocal = result.canvasId
     }
+
     // 添加右键监听 用于拖动窗口
     document.addEventListener('mousedown', mousedownHandle);
     document.addEventListener('mouseup', mouseupHandle);
     document.addEventListener('mousemove', mousemoveHandle);
+    changeVolume(volume);
+
 })
 
 
 onUnmounted(() => {
     // 关闭sdk 
-    
     live2d.live2dEnd(canvasIdLocal, audioIdLocal);
     document.removeEventListener('mousedown', mousedownHandle);
     document.removeEventListener('mouseup', mouseupHandle);
@@ -72,11 +75,19 @@ onUnmounted(() => {
 })
 
 
-// const change_volume = () => {
-//     let audioPlayer: HTMLAudioElement = document.getElementById("audioPlayer") as HTMLAudioElement
-//     audioPlayer.volume = volume.value / 100
-// }
+// 重设音量
+const changeVolume = (value: number) => {
+    if (!audioIdLocal) { return; }
+    const audioPlayer = document.getElementById(audioIdLocal) as HTMLAudioElement | null;
+    if (audioPlayer) {
+        audioPlayer.volume = value / 100;
+    }
+}
 
+// 监听消息 重设音量
+window.electron.ipcRenderer.on('send-change-volume',
+    (_event, data: number) => changeVolume(data)
+);
 
 </script>
 

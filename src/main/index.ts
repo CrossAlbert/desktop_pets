@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, shell } from 'electron'
 import icon from '../../resources/icon.png?asset'
 import { join, normalize } from 'path'
 import fs from 'fs'
@@ -276,6 +276,18 @@ app.whenReady().then(() => {
     const settings = app.getLoginItemSettings();
     return settings.openAtLogin;
   });
+
+
+
+  ipcMain.handle('open-pet-path', async () => {
+    try {
+      await shell.openPath(petsFileDir)
+    } catch (error) {
+      throw error
+    }
+  });
+
+
 
 
 

@@ -217,12 +217,19 @@ const changeSelfStart = throttle(async (index: number, flag: boolean) => {
   changeSelfStartButtonLock.value = false
 }, 500)
 
+
+// 刷新列表
+const refreshList = ()=>{
+
+}
+
+
 </script>
 
 <template>
   <div class="manageBox">
 
-    <DescribeBox></DescribeBox>
+    <DescribeBox @refreshList="refreshList" ></DescribeBox>
 
     <div class="manageItem" v-for="(item, index) in previewList">
 

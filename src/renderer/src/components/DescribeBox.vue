@@ -29,6 +29,7 @@ const setAutoLaunch = async (enable: boolean) => {
 
 // 刷新列表
 const refreshList = throttle(() => {
+    describeBoxShow.value = false
     emit('refreshList')
 }, 500)
 

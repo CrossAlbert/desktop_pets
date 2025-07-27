@@ -1,8 +1,20 @@
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
-import { Ref, ref } from 'vue'
+import { computed, Ref, ref } from 'vue'
 import DescribeBox from '@renderer/components/DescribeBox.vue'
 
+const errorInfor = ref('')
+
+// 释放图片blob内存 img标签加载完成后执行
+const handleImageLoad = (url: string) => {
+  URL.revokeObjectURL(url)
+}
+
+
+// 修改位置信息显示格式
+const getPosition = (i: { x: number, y: number }): string => {
+  return i.x == -100000 && i.y == -100000 ? '屏幕中心' : `${i.x},${i.y}`
+}
 
 // 渲染线程解析后 生成的在视图层的预览列表元素
 type PreviewItemRenderer = {
@@ -19,62 +31,100 @@ type PreviewItemRenderer = {
 }
 
 
-const previewList: Ref<PreviewItemRenderer[]> = ref([])
+const loadingLock = ref(false)
+
+const previewMap: Ref<Map<string, PreviewItemRenderer>> = ref(new Map())
+
+const previewList = computed(() => {
+  return Array.from(previewMap.value)
+})
 
 
-// 释放图片blob img标签加载完成后执行
-const handleImageLoad = (url: string) => {
-  // 释放内存
-  URL.revokeObjectURL(url);
-}
+
+// 获取桌宠预览列表 该方法也用作刷新列表
+const getPreviewList = async () => {
+  try {
+
+    // 从主线程获取预览列表
+    const response = await window.electron.ipcRenderer.invoke('get-preview-list') as PreviewItemIpc[]
+    // 从主线程获取已有的桌宠窗口id petId:windowId
+    const synchronousData = await window.electron.ipcRenderer.invoke('ipc-synchronous-pet-window-id') as { [k: string]: number }
+
+    // 方法用作刷新列表调用 拷贝旧数据
+    const previewMapCopy = new Map(
+      Array.from(previewMap.value).map(([key, value]) => [
+        key,
+        JSON.parse(JSON.stringify(value)),
+      ])
+    )
+
+    // 方法用作刷新列表调用 清除旧数据
+    previewMap.value.clear();
 
 
-// 修改位置信息显示格式
-const getPosition = (i: { x: number, y: number }): string => {
-  if (i.x == -100000 && i.y == -100000) {
-    return '屏幕中心'
-  } else {
-    return `${i.x},${i.y}`
+    // 遍历列表 获取预览图、桌宠基础信息
+    response.forEach(async (el) => {
+      const [
+        imageBuffer,
+        previewInfor
+      ] = await Promise.all([
+        window.electron.ipcRenderer.invoke('get-buffer', el.previewJpgPath),
+        window.electron.ipcRenderer.invoke('get-json', el.previewJsonPath)
+      ]) as [Buffer, PreviewInfor]
+
+      const imageBlob = new Blob([imageBuffer], { type: 'image/jpeg' })
+      const imageUrl = URL.createObjectURL(imageBlob)
+
+      const item: PreviewItemRenderer = {
+        previewInfor: previewInfor,
+        previewJpgBlobUrl: imageUrl,
+        petFilePath: el.petFilePath,
+        windowId: synchronousData[previewInfor.id] || null,
+        previewJsonPath: el.previewJsonPath
+      }
+
+      const key = previewInfor.id
+
+      // 如果方法用作刷新列表调用 map里理应存在旧的数据
+      // 对比是否有已开启桌宠的句柄 保留窗口句柄
+      if (previewMapCopy.has(key)) {
+        const oldWindowId = previewMapCopy.get(key)?.windowId
+        if (oldWindowId) {
+          item.windowId = oldWindowId
+        }
+      }
+
+      // 添加到视图层列表
+      previewMap.value.set(key, item)
+
+    });
+
+  } catch (error) {
+    errorInfor.value = `错误信息：${error}`
   }
 }
 
 
-// 获取桌宠预览列表
-const getPreviewList = async () => {
-  // 从主线程获取预览列表
-  const response = await window.electron.ipcRenderer.invoke('get-preview-list') as PreviewItemIpc[]
-  // 从主线程获取已有的桌宠窗口id petId:windowId
-  const synchronousData = await window.electron.ipcRenderer.invoke('ipc-synchronous-pet-window-id') as { [k: string]: number }
 
-  // 遍历列表 获取预览图、桌宠基础信息
-  response.forEach(async (el) => {
-    const [
-      imageBuffer,
-      previewInfor
-    ] = await Promise.all([
-      window.electron.ipcRenderer.invoke('get-buffer', el.previewJpgPath),
-      window.electron.ipcRenderer.invoke('get-json', el.previewJsonPath)
-    ])
+const startORrefresh = async () => {
+  loadingLock.value = true
 
-    const imageBlob = new Blob([imageBuffer], { type: 'image/jpeg' })
-    const imageUrl = URL.createObjectURL(imageBlob)
+  const sleep = new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, 1800)
+  })
 
-    // 添加到视图层列表
-    previewList.value.push({
-      previewInfor: previewInfor,
-      previewJpgBlobUrl: imageUrl,
-      petFilePath: el.petFilePath,
-      windowId: synchronousData[previewInfor.id] || null,
-      previewJsonPath: el.previewJsonPath
-    })
+  await Promise.all([
+    getPreviewList(),
+    sleep
+  ])
 
-  });
-
+  loadingLock.value = false
 }
 
 
-getPreviewList();
-
+startORrefresh()
 
 // --------------------------------------------------------------------------------------------------------
 
@@ -82,22 +132,24 @@ getPreviewList();
 const startPetButtonLock = ref(false);
 
 // 开启桌宠窗口
-const startPet = async (petFilePath: string, previewInfor: PreviewInfor, index: number) => {
+const startPet = async (key: string) => {
   try {
+    const item = previewMap.value.get(key)
+
     // 一个配置文件只能开启一个窗口
-    if (previewList.value[index].windowId !== null) { return }
+    if (!item || item.windowId !== null) { return }
     // 锁定按钮 开启加载动画
     startPetButtonLock.value = true
     // 准备桌宠必要配置信息
     const infor: PreviewInforIpc = {
-      petFilePath,
+      petFilePath: item.petFilePath,
       // 解决vue深层代理导致的数据无法序列化给ipc
-      ...JSON.parse(JSON.stringify(previewInfor))
+      ...JSON.parse(JSON.stringify(item.previewInfor))
     }
     // 开启桌宠窗口 并获取窗口id
     const windowId = await window.electron.ipcRenderer.invoke('start-pet', infor) as number
     // 设置窗口id
-    previewList.value[index].windowId = windowId
+    item.windowId = windowId
     // 解锁按钮 关闭加载动画
     startPetButtonLock.value = false
   } catch (error) {
@@ -110,16 +162,16 @@ const stopPetButtonLock = ref(false);
 
 
 // 关闭桌宠窗口
-const stopPet = async (index: number) => {
+const stopPet = async (key: string) => {
   try {
-    const item = previewList.value[index]
+    const item = previewMap.value.get(key)
 
-    if (item.windowId === null) { return }
+    if (!item || item.windowId === null) { return }
 
     stopPetButtonLock.value = true
     await window.electron.ipcRenderer.invoke('stop-pet', item.windowId, item.previewInfor.id)
 
-    previewList.value[index].windowId = null
+    item.windowId = null
     stopPetButtonLock.value = false
   } catch (error) {
     ElMessage.error('关闭失败')
@@ -146,18 +198,17 @@ const changeVolume = debounce(async (volume: number, windowId: number | null, pr
 
 const changePositionButtonLock = ref(false)
 // 修改特定桌宠以后默认启动位置
-const changePosition = throttle(async (index: number) => {
+const changePosition = throttle(async (key: string) => {
+  const item = previewMap.value.get(key)
 
-  const item = previewList.value[index]
-
-  if (item.windowId === null) { return }
+  if (!item || item.windowId === null) { return }
 
   changePositionButtonLock.value = true
 
   try {
     const result = await window.electron.ipcRenderer.invoke('ipc-change-position', item.windowId, item.previewJsonPath)
-    previewList.value[index].previewInfor.position.x = result.x
-    previewList.value[index].previewInfor.position.y = result.y
+    item.previewInfor.position.x = result.x
+    item.previewInfor.position.y = result.y
     ElMessage.success('设置成功')
   } catch (error) {
     ElMessage.error('设置失败')
@@ -171,10 +222,11 @@ const changePosition = throttle(async (index: number) => {
 
 const resetPositionButtonLock = ref(false)
 // 重置特定桌宠以后默认启动位置
-const resetPosition = throttle(async (index: number) => {
-  const item = previewList.value[index]
+const resetPosition = throttle(async (key: string) => {
+  const item = previewMap.value.get(key)
 
-  if (item.windowId === null) { return }
+
+  if (!item || item.windowId === null) { return }
 
   try {
     resetPositionButtonLock.value = true;
@@ -183,11 +235,11 @@ const resetPosition = throttle(async (index: number) => {
     // 关闭旧位置窗口
     await window.electron.ipcRenderer.invoke('stop-pet', item.windowId)
     // 修改内存中的配置信息
-    previewList.value[index].previewInfor.position.x = -100000
-    previewList.value[index].previewInfor.position.y = -100000
-    previewList.value[index].windowId = null
+    item.previewInfor.position.x = -100000
+    item.previewInfor.position.y = -100000
+    item.windowId = null
     // 重启桌宠
-    await startPet(item.petFilePath, item.previewInfor, index)
+    await startPet(key)
     resetPositionButtonLock.value = false
     ElMessage.success('重置成功')
   } catch (error) {
@@ -200,12 +252,12 @@ const resetPosition = throttle(async (index: number) => {
 
 const changeSelfStartButtonLock = ref(false)
 // 设置桌宠是否自启
-const changeSelfStart = throttle(async (index: number, flag: boolean) => {
+const changeSelfStart = throttle(async (key: string, flag: boolean) => {
   changeSelfStartButtonLock.value = true
   try {
-    const item = previewList.value[index]
+    const item = previewMap.value.get(key)
 
-    if (item.windowId === null) { return }
+    if (!item || item.windowId === null) { return }
 
     await window.electron.ipcRenderer.invoke('ipc-change-self-start', item.previewJsonPath, flag)
     item.previewInfor.selfStart = flag
@@ -218,20 +270,22 @@ const changeSelfStart = throttle(async (index: number, flag: boolean) => {
 }, 500)
 
 
-// 刷新列表
-const refreshList = ()=>{
 
+// 刷新列表
+const refreshList = () => {
+  startORrefresh()
 }
 
 
 </script>
 
 <template>
-  <div class="manageBox">
+  <div class="manageBox" v-loading="loadingLock" element-loading-text="获取列表中...">
+    <span class="errorSpan" v-if="errorInfor">{{ errorInfor }}</span>
 
-    <DescribeBox @refreshList="refreshList" ></DescribeBox>
+    <DescribeBox @refreshList="refreshList"></DescribeBox>
 
-    <div class="manageItem" v-for="(item, index) in previewList">
+    <div class="manageItem" v-for="[key, item] in previewList">
 
       <img :src="item.previewJpgBlobUrl" @load="handleImageLoad(item.previewJpgBlobUrl)">
       <span>{{ item.previewInfor.name }}</span>
@@ -247,22 +301,22 @@ const refreshList = ()=>{
         <div class="buttonBox">
 
           <el-button :disabled="startPetButtonLock" :loading="startPetButtonLock" type="danger" v-if="item.windowId"
-            @click="stopPet(index)">关闭桌宠</el-button>
+            @click="stopPet(key)">关闭桌宠</el-button>
 
           <el-button :disabled="stopPetButtonLock" :loading="stopPetButtonLock" type="success" v-else
-            @click="startPet(item.petFilePath, item.previewInfor, index)">启动桌宠</el-button>
+            @click="startPet(key)">启动桌宠</el-button>
 
           <el-button :disabled="!item.windowId || changePositionButtonLock" type="primary"
-            @click="changePosition(index)">设置位置</el-button>
+            @click="changePosition(key)">设置位置</el-button>
 
           <el-button :disabled="!item.windowId || resetPositionButtonLock" type="warning"
-            @click="resetPosition(index)">重置位置</el-button>
+            @click="resetPosition(key)">重置位置</el-button>
 
           <el-button v-if="!item.previewInfor.selfStart" :disabled="!item.windowId || changeSelfStartButtonLock"
-            type="info" @click="changeSelfStart(index, true)">设为自启</el-button>
+            type="info" @click="changeSelfStart(key, true)">设为自启</el-button>
 
           <el-button v-else :disabled="!item.windowId || changeSelfStartButtonLock" type="info"
-            @click="changeSelfStart(index, false)">取消自启</el-button>
+            @click="changeSelfStart(key, false)">取消自启</el-button>
 
         </div>
 
@@ -282,11 +336,21 @@ const refreshList = ()=>{
   width: 100%;
   max-width: 900px;
   height: max-content;
+  min-height: 100vh;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   padding: 32px;
+}
+
+.errorSpan {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  padding: 32px;
+  display: block;
+  z-index: 1000;
 }
 
 .manageBox>span {

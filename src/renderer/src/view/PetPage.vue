@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MaskBox from '@renderer/components/MaskBox.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
-import live2d from '../live2d/main';
+import { live2dManage } from '../live2d/main';
 import { useRoute } from 'vue-router';
 const route = useRoute();
 
@@ -10,22 +10,20 @@ let startX = 0;
 let startY = 0;
 
 const mousedownHandle = (e: MouseEvent) => {
-    if (e.button === 2) {
-        // 右键按下
-        dragFlag.value = true;
-        startX = e.screenX;
-        startY = e.screenY;
-    }
+    if (e.button !== 2) { return }
+    // 右键按下
+    dragFlag.value = true;
+    startX = e.screenX;
+    startY = e.screenY;
 }
 
 
 const mouseupHandle = (e: MouseEvent) => {
-    if (e.button === 2) {
-        // 右键松开
-        dragFlag.value = false;
-        startX = 0;
-        startY = 0;
-    }
+    if (e.button !== 2) { return }
+    // 右键松开
+    dragFlag.value = false;
+    startX = 0;
+    startY = 0;
 }
 
 
@@ -40,53 +38,56 @@ const mousemoveHandle = (e: MouseEvent) => {
     }
 }
 
-let audioIdLocal: string | null = null;
-let canvasIdLocal: string | null = null;
 
-onMounted(() => {
+
+
+let live2dManageInstance: live2dManage | null = null;
+
+
+onMounted(async () => {
     const {
         petFilePath,
         live2dFolder,
         modelJsonName,
         volume
     } = route.params as unknown as PreviewInforIpc;
+
     // 开启实例
-    const result = live2d.live2dStart(petFilePath, live2dFolder, modelJsonName);
-    if (result) {
-        audioIdLocal = result.audioId
-        canvasIdLocal = result.canvasId
-    }
+    live2dManageInstance = new live2dManage({ petFilePath, live2dFolder, modelJsonName, containerId: 'canvas_container' });
+    await live2dManageInstance.start();
+    live2dManageInstance.changeVolume(volume);
+
 
     // 添加右键监听 用于拖动窗口
     document.addEventListener('mousedown', mousedownHandle);
     document.addEventListener('mouseup', mouseupHandle);
     document.addEventListener('mousemove', mousemoveHandle);
-    changeVolume(volume);
-
 })
+
+
 
 
 onUnmounted(() => {
     // 关闭sdk 
-    live2d.live2dEnd(canvasIdLocal, audioIdLocal);
+    if (live2dManageInstance) {
+        live2dManageInstance.stop();
+    }
+    // 移除监听
     document.removeEventListener('mousedown', mousedownHandle);
     document.removeEventListener('mouseup', mouseupHandle);
     document.removeEventListener('mousemove', mousemoveHandle);
 })
 
 
-// 重设音量
-const changeVolume = (value: number) => {
-    if (!audioIdLocal) { return; }
-    const audioPlayer = document.getElementById(audioIdLocal) as HTMLAudioElement | null;
-    if (audioPlayer) {
-        audioPlayer.volume = value / 100;
-    }
-}
+
 
 // 监听消息 重设音量
 window.electron.ipcRenderer.on('send-change-volume',
-    (_event, data: number) => changeVolume(data)
+    (_event, data: number) => {
+        if (live2dManageInstance) {
+            live2dManageInstance.changeVolume(data);
+        }
+    }
 );
 
 </script>
@@ -116,13 +117,14 @@ window.electron.ipcRenderer.on('send-change-volume',
 <style>
 #canvas_container {
     flex-shrink: 0;
-    width: 200%;
-    height: 200%;
-    transform: scale(0.5);
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 

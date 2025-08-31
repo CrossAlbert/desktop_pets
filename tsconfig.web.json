@@ -5,11 +5,21 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.vue",
     "src/preload/*.d.ts",
-    "src/Framework/src/**/*",
-    "src/Framework/src/*",
-    "src/Core/*.d.ts"
+    "src/live2dSDK/Framework/src/**/*",
+    "src/live2dSDK/Framework/src/*",
   ],
   "compilerOptions": {
+    // 为了解决live2d sdk 在该项目中ts编译不通过问题
+    // start
+    "skipLibCheck": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "allowUnusedLabels": true,
+    "allowUnreachableCode": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    //end
     "composite": true,
     "baseUrl": ".",
     "paths": {
@@ -20,11 +30,14 @@
         "src/shared/*"
       ],
       "@framework/*": [
-        "src/Framework/src/*"
+        "src/live2dSDK/Framework/src/*"
+      ],
+      "@core/*": [
+        "src/live2dSDK/Core/*"
       ]
     }
   },
   "exclude": [
-    "Framework"
+    "src/live2dSDK/Framework/src/*"
   ]
 }

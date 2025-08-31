@@ -70,7 +70,7 @@ const getPreviewList = async () => {
       ] = await Promise.all([
         window.electron.ipcRenderer.invoke('get-buffer', el.previewJpgPath),
         window.electron.ipcRenderer.invoke('get-json', el.previewJsonPath)
-      ]) as [Buffer, PreviewInfor]
+      ]) as [ArrayBuffer, PreviewInfor]
 
       const imageBlob = new Blob([imageBuffer], { type: 'image/jpeg' })
       const imageUrl = URL.createObjectURL(imageBlob)

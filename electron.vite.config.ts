@@ -18,7 +18,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src'),
-        '@framework': resolve('src/Framework/src')
+        '@framework': resolve('src/live2dSDK/Framework/src'),
+        '@core': resolve('src/live2dSDK/Core')
       }
     },
     plugins: [

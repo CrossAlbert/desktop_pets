@@ -28,7 +28,7 @@ declare global {
    * 从文件夹读取的预览json内存储的必要信息
    */
   type PreviewInfor = {
-    id:string
+    id: string
     // 名称
     name: string
     // 版本信息
@@ -46,7 +46,7 @@ declare global {
     // live2d配置json文件名
     modelJsonName: string
     // 是否自启
-    selfStart:boolean
+    selfStart: boolean
   }
 
 
@@ -73,6 +73,7 @@ declare global {
 
   // 用于描述每个动作、音频、文本、结束延时之间的关系的结构体
   type RelationshipItem = {
+    type: "Expression"
     expressionName: string
     audioName: string | null
     text: string | null
@@ -98,7 +99,6 @@ declare global {
     // drawableName为选项卡中的ID
     // 用来绑定点击位置
     drawableName: string
-    type: "Expression"
     relationship: Array<RelationshipItem>
   }
 
@@ -120,6 +120,34 @@ declare global {
     touchList: Array<TouchItem>
   }
 
+
+  // -----------------------------------------------------------------------------------
+
+
+  // live2d启动所需参数
+  type live2dStartParame = {
+    // 存储被指定桌宠的文件路径 （音频 触摸位置 文本 相关设定）
+    petFilePath: string
+    // live2d文件夹名称
+    live2dFolder: string
+    // live2d配置json文件名
+    modelJsonName: string
+    // 容器id
+    containerId: string
+  }
+
+
+  // live2d启动后返回的特定元素id
+  type live2dStartResult = {
+    // 音频播放器id
+    audioId: string,
+    // live2d绘制画布id
+    canvasId: string
+  }
+
 }
+
+
+
 
 export { };

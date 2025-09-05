@@ -114,9 +114,10 @@ declare global {
     // 将要透明化的部件名称写入列表
     shieldPartList: Array<string>
     // 休眠动画和语音
-    sleep: Array<SleepItem>
+    sleep: Array<SleepItem> | null
     // 唤醒动画和语音
-    awaken: Array<AwakenItem>
+    awaken: Array<AwakenItem> | null
+    // 触摸动画列表
     touchList: Array<TouchItem>
   }
 

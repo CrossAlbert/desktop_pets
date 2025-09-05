@@ -342,6 +342,10 @@ const refreshList = () => {
   grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   padding: 32px;
+  background-image: url('../assets/svg/bag.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
 
 .errorSpan {

@@ -13,6 +13,7 @@ declare module 'vue' {
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElSlider: typeof import('element-plus/es')['ElSlider']
+    ElTree: typeof import('element-plus/es')['ElTree']
     MaskBox: typeof import('./src/components/MaskBox.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

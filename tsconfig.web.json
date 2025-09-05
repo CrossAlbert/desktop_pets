@@ -38,6 +38,6 @@
     }
   },
   "exclude": [
-    "src/live2dSDK/Framework/src/*"
+    // "src/live2dSDK/Framework/src/*"
   ]
 }

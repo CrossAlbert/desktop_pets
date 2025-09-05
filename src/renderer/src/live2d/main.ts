@@ -226,6 +226,13 @@ export class live2dManage {
     // 加载模型
     await this._model.loadAssets(this._petFilePath, this._live2dFolder, this._modelJsonName);
 
+    // 读取屏蔽部件列表
+    if (this._petConfig.shieldPartList.length > 0) {
+      this._petConfig.shieldPartList.forEach(item => {
+        this._model.setPartOpacity(item, 0);
+      });
+    }
+
     // 动画渲染循环，模型更新
     this._modelClock.update();
     this.run();

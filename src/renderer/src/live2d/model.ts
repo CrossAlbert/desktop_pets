@@ -518,7 +518,7 @@ export class Model extends CubismUserModel {
       this._breath.updateParameters(this._model, deltaTimeSeconds);
     }
 
-    // 物理演算の設定
+    // 物理演算设定
     if (this._physics != null) {
       this._physics.evaluate(this._model, deltaTimeSeconds);
     }

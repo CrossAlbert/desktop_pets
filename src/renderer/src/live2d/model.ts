@@ -322,7 +322,6 @@ export class Model extends CubismUserModel {
    */
   private async setupTextures(): Promise<void> {
     try {
-      // 为了在iPhone上提高Alpha质量，TypeScript中采用了premultipliedAlpha。
       const usePremultiply = true;
 
       const modelSetting = this._modelSetting;
@@ -496,24 +495,18 @@ export class Model extends CubismUserModel {
 
     // 拖动更改
     // 通过拖动调整脸部朝向
-    this._model.addParameterValueById(this._idParamAngleX, this._dragX * 30); // -30から30の値を加える
+    this._model.addParameterValueById(this._idParamAngleX, this._dragX * 30);
     this._model.addParameterValueById(this._idParamAngleY, this._dragY * 30);
-    this._model.addParameterValueById(
-      this._idParamAngleZ,
-      this._dragX * this._dragY * -30
-    );
+    this._model.addParameterValueById(this._idParamAngleZ, this._dragX * this._dragY * -30);
 
-    // ドラッグによる体の向きの調整
-    this._model.addParameterValueById(
-      this._idParamBodyAngleX,
-      this._dragX * 10
-    ); // -10から10の値を加える
+    // 进行的身体方向调整
+    this._model.addParameterValueById(this._idParamBodyAngleX, this._dragX * 10);
 
-    // ドラッグによる目の向きの調整
-    this._model.addParameterValueById(this._idParamEyeBallX, this._dragX); // -1から1の値を加える
+    // 进行的眼球方向调整
+    this._model.addParameterValueById(this._idParamEyeBallX, this._dragX);
     this._model.addParameterValueById(this._idParamEyeBallY, this._dragY);
 
-    // 呼吸など
+    // 呼吸
     if (this._breath != null) {
       this._breath.updateParameters(this._model, deltaTimeSeconds);
     }
@@ -613,22 +606,12 @@ export class Model extends CubismUserModel {
 
           // 设置带有自动效果的参数标识列表
           motion.setEffectIds(this._eyeBlinkIds, this._lipSyncIds);
-          autoDelete = true; // 終了時にメモリから削除
+          autoDelete = true;
         })
-
+        
     } else {
       // 注册运动播放结束回调
       motion.setFinishedMotionHandler(onFinishedMotionHandler!);
-    }
-
-    //voice
-    // 获取与运动相对应的声音文件的名称
-    const voice = this._modelSetting!.getMotionSoundFileName(group, no);
-    if (voice.localeCompare('') != 0) {
-      let path = voice;
-      path = this._modelHomeDir + path;
-      // 拼接路径 播放声音
-      // this._wavFileHandler.start(path);
     }
 
 
@@ -678,7 +661,6 @@ export class Model extends CubismUserModel {
 
 
   /**
-   * イベントの発火を受け取る
    * 运动事件触发
    */
   public motionEventFired(eventValue: csmString): void {
@@ -707,19 +689,6 @@ export class Model extends CubismUserModel {
     // 判断点击坐标是否在对应图形组件上
     return this.isHit(id, x, y);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -759,15 +728,7 @@ export class Model extends CubismUserModel {
 
 
 
-
-
-
-
-
   /**
-   * 画面を更新するときの処理
-   * モデルの更新処理及び描画処理を行う
-   * 
    * 更新画面时的处理
    * 进行模型更新处理及描绘处理
    */
@@ -784,18 +745,16 @@ export class Model extends CubismUserModel {
       projection.scale(height / width, 1.0);
     }
 
-    // 必要があればここで乗算
+    // 在此处进行乘法运算
     if (this._viewMatrix != null) {
       projection.multiplyByMatrix(this._viewMatrix);
     }
 
 
     this.update();
-    this.draw(projection); // 参照渡しなのでprojectionは変質する。
-
+    this.draw(projection);
 
   }
-
 
 
 
@@ -805,18 +764,6 @@ export class Model extends CubismUserModel {
       this._viewMatrix.getArray()[i] = m.getArray()[i];
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -852,9 +799,7 @@ export class Model extends CubismUserModel {
 
     this._clock = clock;
 
-    // this._textures = new csmVector<TextureInfo>();
 
-    // ------------------------------------
     this._modelSetting = null;
     this._userTimeSeconds = 0.0;
 
@@ -890,8 +835,6 @@ export class Model extends CubismUserModel {
     this._mocConsistency = true;
 
 
-
-
     this._textureCount = 0;
 
     this._consistency = false;
@@ -922,8 +865,6 @@ export class Model extends CubismUserModel {
 
 
   _consistency: boolean; // MOC3一致性检查是否通过
-
-
 
   _canvas: HTMLCanvasElement;
 

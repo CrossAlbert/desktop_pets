@@ -26,9 +26,13 @@ export class ClickManage {
     private _petFilePath: string;
     // 音频ID
     private _audioId: string;
+    // 画布物理像素缩放值
+    // 以作为实现超采样手段 因为部分live2d文件存在不明原因的轻微模糊
+    private _physicalScale: number
 
-
-    constructor(model: Model, tool: CoordTransform, canvas: HTMLCanvasElement, petConfig: PetConfig, petFilePath: string, audioId: string) {
+    constructor(model: Model, tool: CoordTransform, canvas: HTMLCanvasElement,
+        petConfig: PetConfig, petFilePath: string, audioId: string, physicalScale: number
+    ) {
         this._startY = 0;
         this._startX = 0;
         this._lastY = 0;
@@ -40,6 +44,7 @@ export class ClickManage {
         this._petConfig = petConfig;
         this._petFilePath = petFilePath;
         this._audioId = audioId;
+        this._physicalScale = physicalScale;
     }
 
 
@@ -50,10 +55,10 @@ export class ClickManage {
         if (e.button !== 0) { return; }
 
         this._modelCanvas.setPointerCapture(e.pointerId);
-        this._startX = e.pageX;
-        this._startY = e.pageY;
-        this._lastX = e.pageX;
-        this._lastY = e.pageY;
+        this._startX = e.pageX * this._physicalScale;
+        this._startY = e.pageY * this._physicalScale;
+        this._lastX = e.pageX * this._physicalScale;
+        this._lastY = e.pageY * this._physicalScale;
         this._isPress = true;
     }
 
@@ -79,8 +84,8 @@ export class ClickManage {
         const posY: number = e.clientY - rect.top;
 
         // 更新坐标
-        this._lastX = posX;
-        this._lastY = posY;
+        this._lastX = posX * this._physicalScale;
+        this._lastY = posY * this._physicalScale;
 
     }
 
@@ -132,8 +137,8 @@ export class ClickManage {
 
 
         // 更新坐标
-        this._lastX = posX;
-        this._lastY = posY;
+        this._lastX = posX * this._physicalScale;
+        this._lastY = posY * this._physicalScale;
 
     }
 

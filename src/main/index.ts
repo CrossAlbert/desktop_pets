@@ -1,17 +1,18 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, shell } from 'electron'
-import icon from '../../resources/icon.png?asset'
-import { join, normalize } from 'path'
-import fs from 'fs'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
-import type { } from '@shared/types'
-import createManageWindow from './createManageWindow'
-import createPetWindow from './createPetWindow'
-import getPreviewList from './getPreviewList'
-import changeJsonFile from './changeJson'
+import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, shell } from 'electron';
+import icon from '../../resources/icon.png?asset';
+import { join, normalize } from 'path';
+import fs from 'fs';
+import { electronApp, optimizer } from '@electron-toolkit/utils';
+import type { } from '@shared/types';
+import createManageWindow from './createManageWindow';
+import createPetWindow from './createPetWindow';
+import getPreviewList from './getPreviewList';
+import changeJsonFile from './changeJson';
+import { isPathInPetsFileDir } from './isPathInPetsFileDir';
 
 
 // 获取单例锁 如果是多次执行的实例 直接关闭
-if (!app.requestSingleInstanceLock()) { app.quit() }
+if (!app.requestSingleInstanceLock()) { app.quit() };
 
 
 // 存储管理页面窗口实例
@@ -115,6 +116,9 @@ app.whenReady().then(() => {
   // 获取读取json
   ipcMain.handle('get-json', (_event, path: string) => {
     try {
+      if (!isPathInPetsFileDir(petsFileDir, path)) {
+        throw new Error('get-json 获取路径异常');
+      }
       const data = fs.readFileSync(normalize(path), 'utf8');
       return JSON.parse(data);
     } catch (error) {
@@ -127,6 +131,9 @@ app.whenReady().then(() => {
   // 获取文件字节流
   ipcMain.handle('get-buffer', (_event, path: string) => {
     try {
+      if (!isPathInPetsFileDir(petsFileDir, path)) {
+        throw new Error('get-buffer 获取路径异常');
+      }
       const buf = fs.readFileSync(normalize(path));
       const buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
       return buffer;
@@ -187,10 +194,15 @@ app.whenReady().then(() => {
   });
 
 
+
   // 修改默认音量配置
   ipcMain.handle('ipc-change-volume',
     async (_event, windowId: number, volumeNumber: number, previewJsonPath: string) => {
       try {
+
+        if (!isPathInPetsFileDir(petsFileDir, previewJsonPath)) {
+          throw new Error('ipc-change-volume 获取路径异常');
+        }
 
         const win = BrowserWindow.fromId(windowId)
         if (!win) { throw new Error('The window pointed to by ID does not exist') }
@@ -210,6 +222,11 @@ app.whenReady().then(() => {
   ipcMain.handle('ipc-change-position',
     async (_event, windowId: number, previewJsonPath: string): Promise<{ x: number, y: number }> => {
       try {
+
+        if (!isPathInPetsFileDir(petsFileDir, previewJsonPath)) {
+          throw new Error('ipc-change-position 获取路径异常');
+        }
+
         const win = BrowserWindow.fromId(windowId);
         if (!win) { throw new Error('The window pointed to by ID does not exist') }
 
@@ -230,6 +247,11 @@ app.whenReady().then(() => {
   ipcMain.handle('ipc-reset-position',
     async (_event, previewJsonPath: string) => {
       try {
+
+        if (!isPathInPetsFileDir(petsFileDir, previewJsonPath)) {
+          throw new Error('ipc-reset-position 获取路径异常');
+        }
+
         // 修改配置文件 设置启动位置
         await changeJsonFile(previewJsonPath, ["position"], { x: -100000, y: -100000 });
       } catch (error) {
@@ -242,6 +264,11 @@ app.whenReady().then(() => {
   ipcMain.handle('ipc-change-self-start',
     async (_event, previewJsonPath: string, flag: boolean) => {
       try {
+
+        if (!isPathInPetsFileDir(petsFileDir, previewJsonPath)) {
+          throw new Error('ipc-change-self-start 获取路径异常');
+        }
+
         // 修改配置文件 设置是否自启
         await changeJsonFile(previewJsonPath, ["selfStart"], flag);
       } catch (error) {
@@ -303,6 +330,10 @@ app.whenReady().then(() => {
         previewList.map(async item => {
 
           const data = await new Promise<string>((resolve, reject) => {
+            if (!isPathInPetsFileDir(petsFileDir, item.previewJsonPath)) {
+              reject(new Error('getPreviewList 获取路径异常'));
+            }
+
             fs.readFile(normalize(item.previewJsonPath), 'utf8', (err, data) => {
               if (err) {
                 reject(err)

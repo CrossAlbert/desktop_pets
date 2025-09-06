@@ -33,7 +33,8 @@ export class live2dManage {
   private _animationId: number | null;
   // 桌宠配置
   private _petConfig: PetConfig | null;
-
+  // 画布物理像素缩放值
+  private _physicalScale:number
 
 
   constructor(parme: live2dStartParame) {
@@ -44,6 +45,7 @@ export class live2dManage {
     this._live2dFolder = live2dFolder;
     this._modelJsonName = modelJsonName;
     this._containerId = containerId;
+    this._physicalScale = 1.25;
 
 
     // 建立画布 并同时检测webgl
@@ -103,9 +105,10 @@ export class live2dManage {
     // 获取屏幕缩放比
     const devicePixelRatio = window.devicePixelRatio || 1;
 
+
     // 设置画布渲染大小为物理像素
-    modelCanvas.width = container.clientWidth * devicePixelRatio;
-    modelCanvas.height = container.clientHeight * devicePixelRatio;
+    modelCanvas.width = container.clientWidth * devicePixelRatio * this._physicalScale;
+    modelCanvas.height = container.clientHeight * devicePixelRatio * this._physicalScale;
 
     // 设置画布大小为容器尺寸（逻辑像素）
     modelCanvas.style.width = `${container.clientWidth}px`;
@@ -237,6 +240,9 @@ export class live2dManage {
     this._modelClock.update();
     this.run();
 
+    // 执行一次默认表情
+    this._model.setExpression(this._petConfig.defaultExpression)
+
     if (this._petConfig) {
       // 点击管理类
       this._clickM = new ClickManage(
@@ -245,7 +251,8 @@ export class live2dManage {
         this._canvas,
         this._petConfig,
         this._petFilePath,
-        this._audioId
+        this._audioId,
+        this._physicalScale
       );
 
       //画布添加click监听 绑定监听

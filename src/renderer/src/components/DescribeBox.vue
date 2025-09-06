@@ -56,11 +56,28 @@ const data = ref([
                         children: [
                             {
                                 label: '用途：存储语音mp3文件'
+                            },
+                            {
+                                label: 'mp3的文件名与下方RelationshipItem类型中'
+                            },
+                            {
+                                label: 'audioName属性互相映射'
                             }
                         ]
                     },
                     {
                         label: '文件夹：Live2D模型文件夹',
+                        children: [
+                            {
+                                label: '在[桌宠1]文件夹下的配置文件中，',
+                            },
+                            {
+                                label: '提到的Live2D模型文件夹，均为此文件夹',
+                            },
+                            {
+                                label: '命名无要求',
+                            }
+                        ]
                     },
                     {
                         label: '文件：config_pet.json',
@@ -72,7 +89,7 @@ const data = ref([
                                 label: 'defaultExpression: string',
                                 children: [
                                     {
-                                        label: '用途：模型默认姿势',
+                                        label: '用途：模型默认表情名称',
                                     }
                                 ]
                             },
@@ -101,6 +118,9 @@ const data = ref([
                                 children: [
                                     {
                                         label: '用途：休眠动画和语音',
+                                    },
+                                    {
+                                        label: '这个功能鸽了，写null吧',
                                     }
                                 ]
                             },
@@ -109,6 +129,9 @@ const data = ref([
                                 children: [
                                     {
                                         label: '用途：唤醒动画和语音',
+                                    },
+                                    {
+                                        label: '这个功能鸽了，写null吧',
                                     }
                                 ]
                             },
@@ -171,6 +194,9 @@ const data = ref([
                                                     },
                                                     {
                                                         label: '文件名为audio文件夹内容对应'
+                                                    },
+                                                    {
+                                                        label: '需带文件后缀名'
                                                     }
                                                 ]
                                             },
@@ -343,11 +369,14 @@ const data = ref([
                                 label: 'modelJsonName: string',
                                 children: [
                                     {
-                                        label: 'Live2D文件夹中，.model3.json后缀文件的完整文件名'
+                                        label: 'Live2D文件夹中'
+                                    },
+                                    {
+                                        label: '.model3.json后缀文件的完整文件名'
                                     }
                                 ]
                             },
-                            
+
                         ]
                     }
                 ],

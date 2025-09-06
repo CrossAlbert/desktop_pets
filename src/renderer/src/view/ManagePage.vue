@@ -50,7 +50,7 @@ const getPreviewList = async () => {
     // 从主线程获取已有的桌宠窗口id petId:windowId
     const synchronousData = await window.electron.ipcRenderer.invoke('ipc-synchronous-pet-window-id') as { [k: string]: number }
 
-    // 方法用作刷新列表调用 拷贝旧数据
+    // 方法用作刷新列表调用时 拷贝旧数据
     const previewMapCopy = new Map(
       Array.from(previewMap.value).map(([key, value]) => [
         key,
@@ -58,7 +58,7 @@ const getPreviewList = async () => {
       ])
     )
 
-    // 方法用作刷新列表调用 清除旧数据
+    // 方法用作刷新列表调用时 清除旧数据
     previewMap.value.clear();
 
 
@@ -85,7 +85,7 @@ const getPreviewList = async () => {
 
       const key = previewInfor.id
 
-      // 如果方法用作刷新列表调用 map里理应存在旧的数据
+      // 如果方法用作刷新列表调用时 map里理应存在旧的数据
       // 对比是否有已开启桌宠的句柄 保留窗口句柄
       if (previewMapCopy.has(key)) {
         const oldWindowId = previewMapCopy.get(key)?.windowId
@@ -112,7 +112,7 @@ const startORrefresh = async () => {
   const sleep = new Promise<void>((resolve) => {
     setTimeout(() => {
       resolve()
-    }, 1800)
+    }, 800)
   })
 
   await Promise.all([
@@ -328,6 +328,12 @@ const refreshList = () => {
 
     </div>
 
+    <el-card v-if="previewList.length == 0" class="promptCard">
+      <p>目标文件夹下暂无桌宠</p>
+      <p>或桌宠文件未按照配置进行部署</p>
+      <p>请点击右侧橙色按钮查看说明</p>
+    </el-card>
+
   </div>
 </template>
 
@@ -359,6 +365,24 @@ const refreshList = () => {
 
 .manageBox>span {
   color: #303133;
+}
+
+.promptCard{
+  width: 400px;
+  height: max-content;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.promptCard p{
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 .manageItem {

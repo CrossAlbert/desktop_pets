@@ -474,7 +474,7 @@ const data = ref([
 <style lang="css" scoped>
 .describeBoxShell {
     z-index: 500;
-    position: absolute;
+    position: fixed;
     top: 0%;
     left: 0%;
     width: 100%;
@@ -485,12 +485,12 @@ const data = ref([
 }
 
 .buttonOpenBox {
-    position: absolute;
+    position: fixed;
     right: 0%;
     top: 50%;
     transform: translateY(-50%);
     height: 85px;
-    width: 30px;
+    width: 25px;
     border-radius: 8px 0px 0px 8px;
     background-color: rgb(235, 115, 23);
     display: flex;
@@ -529,7 +529,7 @@ const data = ref([
 
 .buttonClossBox {
     height: 85px;
-    width: 30px;
+    width: 25px;
     border-radius: 8px 0px 0px 8px;
     background-color: white;
     display: flex;

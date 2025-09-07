@@ -1,6 +1,7 @@
 import type { Model } from './model';
 import type { CoordTransform } from './coordTransform';
 import { noAudio, haveAudio } from './petTool';
+import { evaluate } from 'mathjs';
 
 
 export class ClickManage {
@@ -55,10 +56,10 @@ export class ClickManage {
         if (e.button !== 0) { return; }
 
         this._modelCanvas.setPointerCapture(e.pointerId);
-        this._startX = e.pageX * this._physicalScale;
-        this._startY = e.pageY * this._physicalScale;
-        this._lastX = e.pageX * this._physicalScale;
-        this._lastY = e.pageY * this._physicalScale;
+        this._startX = e.pageX;
+        this._startY = e.pageY;
+        this._lastX = e.pageX;
+        this._lastY = e.pageY;
         this._isPress = true;
     }
 
@@ -84,8 +85,8 @@ export class ClickManage {
         const posY: number = e.clientY - rect.top;
 
         // 更新坐标
-        this._lastX = posX * this._physicalScale;
-        this._lastY = posY * this._physicalScale;
+        this._lastX = posX;
+        this._lastY = posY;
 
     }
 
@@ -96,8 +97,15 @@ export class ClickManage {
         if (e.button !== 0) { return; }
         this._modelCanvas.releasePointerCapture(e.pointerId)
 
+
+        // 获取屏幕缩放比
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        // 处理画布因系统缩放比 超采样 导致的坐标偏移
+        const adjustX = evaluate(`${this._lastX} * ${devicePixelRatio} * ${this._physicalScale}`)
+        const adjustY = evaluate(`${this._lastY} * ${devicePixelRatio} * ${this._physicalScale}`)
+
         // 变换坐标
-        const { x, y } = this._tool.transformScreen(this._lastX, this._lastY)
+        const { x, y } = this._tool.transformScreen(adjustX, adjustY);
 
         // 如果存在模型 结束拖拽操作 验证点击
         if (this._model !== null) {
@@ -137,8 +145,8 @@ export class ClickManage {
 
 
         // 更新坐标
-        this._lastX = posX * this._physicalScale;
-        this._lastY = posY * this._physicalScale;
+        this._lastX = posX;
+        this._lastY = posY;
 
     }
 

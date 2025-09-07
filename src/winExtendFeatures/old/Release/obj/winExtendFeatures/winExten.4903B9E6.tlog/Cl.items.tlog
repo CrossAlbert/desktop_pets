@@ -1,0 +1,9 @@
+E:\vue_test\node_napi\node-c\index.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\index.obj
+E:\vue_test\node_napi\node-c\src\get_infor.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\get_infor.obj
+E:\vue_test\node_napi\node-c\src\components\get_icon.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\components\get_icon.obj
+E:\vue_test\node_napi\node-c\src\components\read_shortcut.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\components\read_shortcut.obj
+E:\vue_test\node_napi\node-c\src\chang_desktop.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\chang_desktop.obj
+E:\vue_test\node_napi\node-c\src\empty_trash.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\empty_trash.obj
+E:\vue_test\node_napi\node-c\src\open_software.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\open_software.obj
+E:\vue_test\node_napi\node-c\src\get_desktop_path.cpp;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\src\get_desktop_path.obj
+C:\Users\PC\AppData\Roaming\npm\node_modules\node-gyp\src\win_delay_load_hook.cc;E:\vue_test\node_napi\node-c\build\Release\obj\winExtendFeatures\win_delay_load_hook.obj

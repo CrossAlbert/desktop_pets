@@ -280,10 +280,11 @@ const refreshList = () => {
 </script>
 
 <template>
+  <DescribeBox @refreshList="refreshList"></DescribeBox>
   <div class="manageBox" v-loading="loadingLock" element-loading-text="获取列表中...">
     <span class="errorSpan" v-if="errorInfor">{{ errorInfor }}</span>
 
-    <DescribeBox @refreshList="refreshList"></DescribeBox>
+
 
     <div class="manageItem" v-for="[key, item] in previewList">
 
@@ -367,7 +368,7 @@ const refreshList = () => {
   color: #303133;
 }
 
-.promptCard{
+.promptCard {
   width: 400px;
   height: max-content;
   position: absolute;
@@ -379,7 +380,7 @@ const refreshList = () => {
   align-items: center;
 }
 
-.promptCard p{
+.promptCard p {
   display: block;
   width: 100%;
   text-align: center;

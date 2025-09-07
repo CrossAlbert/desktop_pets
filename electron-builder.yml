@@ -15,7 +15,7 @@ win:
   executableName: desktop_pets
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
+  shortcutName: Live2D桌宠管理器
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:

@@ -26,6 +26,7 @@
     "electron-updater": "^6.3.9",
     "element-plus": "^2.10.2",
     "lodash": "^4.17.21",
+    "mathjs": "^14.7.0",
     "pinia": "^3.0.3",
     "vue-router": "^4.5.1"
   },

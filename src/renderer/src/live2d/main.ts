@@ -4,7 +4,7 @@ import { Model } from './model';
 import { Clock } from './clock';
 import { CoordTransform } from './coordTransform';
 import { ClickManage } from './clickManage';
-import { haveAudio, noAudio, pollBilibiliLive } from './petTool';
+import { haveAudio, noAudio } from './petTool';
 
 
 export class live2dManage {
@@ -38,6 +38,8 @@ export class live2dManage {
   private _physicalScale: number;
   // 开播状态轮询
   private _pollingTimer: null | NodeJS.Timeout;
+  // 上一次记录的直播时间
+  private _lastLiveTime: null | string;
 
 
   constructor(parme: live2dStartParame) {
@@ -82,6 +84,7 @@ export class live2dManage {
     this._animationId = null;
     this._petConfig = null;
     this._pollingTimer = null;
+    this._lastLiveTime = null;
   }
 
 
@@ -226,9 +229,13 @@ export class live2dManage {
 
   private async pollingLiveRoom() {
     // 轮询直播间是否开播
-    console.log(this);
-    
-    if (pollBilibiliLive(this._petConfig.liveMonitor.roomId)) {
+    const { flag, time } = await window.electron.ipcRenderer.invoke(
+      'ipc-poll-bilibili-live', this._petConfig.liveMonitor.roomId
+    ) as { flag: boolean, time: string };
+
+
+    if (flag && time != this._lastLiveTime) {
+      this._lastLiveTime = time;
       if (this._petConfig.liveMonitor.relationship.audioName) {
         await haveAudio(
           this._model,
@@ -273,7 +280,7 @@ export class live2dManage {
       const the = this;
       this._pollingTimer = setInterval(
         this.pollingLiveRoom.bind(the),
-        60000
+        120000
       )
     }
 

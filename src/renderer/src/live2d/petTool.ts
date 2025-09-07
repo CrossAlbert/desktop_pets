@@ -105,29 +105,35 @@ export const haveAudio = async (model: Model, configItem: RelationshipItem, defa
 
 
 
-// 轮询哔哩哔哩直播间直播状态
-export const pollBilibiliLive = async (roomId: number) => {
-    try {
-        const response = await fetch(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
+// 轮询哔哩哔哩直播间直播状态 (跨域 转主线程)
+// export const pollBilibiliLive = async (roomId: number) => {
+//     try {
+//         const response = await fetch(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+//         if (!response.ok) {
+//             throw new Error(`HTTP error! status: ${response.status}`);
+//         }
 
-        const data = await response.json();
+//         const data = await response.json();
 
-        // 检查返回码
-        if (data.code !== 0) {
-            throw new Error(`API 返回错误`);
-        }
+//         // 检查返回码
+//         if (data.code !== 0) {
+//             throw new Error(`API 返回错误`);
+//         }
 
-        if (!data.data.live_status) {
-            throw new Error(`API 返回错误`);
-        }
+//         if (!data.data.live_status) {
+//             throw new Error(`API 返回错误`);
+//         }
 
-        return data.data.live_status === 1 ? true : false;
+//         return {
+//             flag: data.data.live_status === 1 ? true : false,
+//             time: data.data.live_time
+//         }
 
-    } catch (error) {
-       return false;
-    }
-}
+//     } catch (error) {
+//         return {
+//             flag: false,
+//             time: null
+//         }
+//     }
+// }

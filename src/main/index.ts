@@ -9,6 +9,7 @@ import createPetWindow from './createPetWindow';
 import getPreviewList from './getPreviewList';
 import changeJsonFile from './changeJson';
 import { isPathInPetsFileDir } from './isPathInPetsFileDir';
+import axios from 'axios';
 
 
 // 获取单例锁 如果是多次执行的实例 直接关闭
@@ -315,6 +316,34 @@ app.whenReady().then(() => {
   });
 
 
+
+  // 轮询直播间状态
+  ipcMain.handle('ipc-poll-bilibili-live',
+    async (_event, roomId: number) => {
+      try {
+
+        const { data } = await axios.get(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
+
+        if (data.code !== 0) {
+            throw new Error(`API 返回错误`);
+        }
+
+        if (!data.data.live_status) {
+            throw new Error(`API 返回错误`);
+        }
+
+        return {
+            flag: data.data.live_status === 1 ? true : false,
+            time: data.data.live_time
+        }
+
+      } catch (error) {
+        return {
+          flag: false,
+          time: null
+        }
+      }
+    })
 
 
 

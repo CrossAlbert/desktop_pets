@@ -25,6 +25,8 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
         fullscreenable: false,
         // 使窗口的标题栏隐藏
         titleBarStyle: 'hidden',
+        // 窗口不在任务栏显示
+        skipTaskbar:true,
         ...(process.platform === 'linux' ? { icon } : {}),
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),

@@ -5,6 +5,7 @@ import { type Model } from './model';
 const setText = (text: string) => {
     const div = document.getElementById('text_container') as HTMLDivElement;
     if (div) {
+        div.replaceChildren();
         const span = document.createElement('span');
         span.textContent = text;
         span.style.animation = 'fadeIn 0.5s ease forwards';
@@ -99,4 +100,34 @@ export const haveAudio = async (model: Model, configItem: RelationshipItem, defa
     // 设置监听回调
     audioPlayer.addEventListener('canplay', canPlayHandler);
     audioPlayer.addEventListener('ended', endedHandler);
+}
+
+
+
+
+// 轮询哔哩哔哩直播间直播状态
+export const pollBilibiliLive = async (roomId: number) => {
+    try {
+        const response = await fetch(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // 检查返回码
+        if (data.code !== 0) {
+            throw new Error(`API 返回错误`);
+        }
+
+        if (!data.data.live_status) {
+            throw new Error(`API 返回错误`);
+        }
+
+        return data.data.live_status === 1 ? true : false;
+
+    } catch (error) {
+       return false;
+    }
 }

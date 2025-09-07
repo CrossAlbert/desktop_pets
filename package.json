@@ -1,6 +1,6 @@
 {
   "name": "desktop_pets",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
@@ -36,7 +36,7 @@
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.3",
-    "electron": "^35.1.5",
+    "electron": "^35.3.0",
     "electron-builder": "^25.1.8",
     "electron-vite": "^3.1.0",
     "eslint": "^9.24.0",

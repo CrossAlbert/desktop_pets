@@ -4,6 +4,7 @@ import { Model } from './model';
 import { Clock } from './clock';
 import { CoordTransform } from './coordTransform';
 import { ClickManage } from './clickManage';
+import { haveAudio, noAudio, pollBilibiliLive } from './petTool';
 
 
 export class live2dManage {
@@ -34,7 +35,9 @@ export class live2dManage {
   // 桌宠配置
   private _petConfig: PetConfig | null;
   // 画布物理像素缩放值
-  private _physicalScale:number
+  private _physicalScale: number;
+  // 开播状态轮询
+  private _pollingTimer: null | NodeJS.Timeout;
 
 
   constructor(parme: live2dStartParame) {
@@ -78,6 +81,7 @@ export class live2dManage {
     this._clickM = null;
     this._animationId = null;
     this._petConfig = null;
+    this._pollingTimer = null;
   }
 
 
@@ -206,7 +210,11 @@ export class live2dManage {
 
 
 
-
+  /**
+   * 修改音量
+   * @param value 
+   * @returns 
+   */
   public changeVolume(value: number) {
     if (!this._audioId) { return; }
     const audioPlayer = document.getElementById(this._audioId) as HTMLAudioElement | null;
@@ -214,6 +222,29 @@ export class live2dManage {
     audioPlayer.volume = value / 100;
   }
 
+
+
+  private async pollingLiveRoom() {
+    // 轮询直播间是否开播
+    console.log(this);
+    
+    if (pollBilibiliLive(this._petConfig.liveMonitor.roomId)) {
+      if (this._petConfig.liveMonitor.relationship.audioName) {
+        await haveAudio(
+          this._model,
+          this._petConfig.liveMonitor.relationship,
+          this._petConfig.defaultExpression,
+          this._petFilePath,
+          this._audioId
+        );
+      } else {
+        noAudio(
+          this._model,
+          this._petConfig.liveMonitor.relationship,
+          this._petConfig.defaultExpression);
+      }
+    }
+  }
 
 
 
@@ -236,12 +267,24 @@ export class live2dManage {
       });
     }
 
+
+    // 如果有直播房间号 执行直播状态轮询
+    if (this._petConfig.liveMonitor) {
+      const the = this;
+      this._pollingTimer = setInterval(
+        this.pollingLiveRoom.bind(the),
+        60000
+      )
+    }
+
+
+
     // 动画渲染循环，模型更新
     this._modelClock.update();
     this.run();
 
     // 执行一次默认表情
-    this._model.setExpression(this._petConfig.defaultExpression)
+    this._model.setExpression(this._petConfig.defaultExpression);
 
     if (this._petConfig) {
       // 点击管理类
@@ -270,6 +313,11 @@ export class live2dManage {
     if (this._animationId) {
       cancelAnimationFrame(this._animationId);
     }
+
+    if (this._pollingTimer) {
+      clearInterval(this._pollingTimer);
+    }
+
     // Cubism SDK释放
     CubismFramework.dispose();
 

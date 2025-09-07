@@ -114,6 +114,36 @@ const data = ref([
                                 ]
                             },
                             {
+                                label: 'liveMonitor: Object | null',
+                                children: [
+                                    {
+                                        label: '用途：轮询指定直播间是否开播',
+                                    },
+                                    {
+                                        label: '可设置为null',
+                                    },
+                                    {
+                                        label: 'roomId: number',
+                                        children: [
+                                            {
+                                                label: '需要监听的直播间房间号',
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        label: 'relationship: RelationshipItem',
+                                        children: [
+                                            {
+                                                label: '发现直播间开播后执行的动作与语音',
+                                            },
+                                            {
+                                                label: 'RelationshipItem见下方泛型解释',
+                                            },
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
                                 label: 'sleep: Array<SleepItem> | null',
                                 children: [
                                     {
@@ -463,7 +493,7 @@ const data = ref([
 
                 <div class="structureDescriptionBox">
                     <span style="display: block;margin-bottom: 14px; width: 100%; text-align: center;">配置说明</span>
-                    <el-tree style="max-width: 100%" :data="data" :default-expand-all="true" />
+                    <el-tree style="max-width: 100%" :data="data" />
                 </div>
             </div>
         </Transition>

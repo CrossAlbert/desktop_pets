@@ -1,6 +1,6 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu, shell } from 'electron';
+import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu } from 'electron';
 import icon from '../../resources/icon.png?asset';
-import { join, normalize } from 'path';
+import { join, normalize, resolve } from 'path';
 import fs from 'fs';
 import { electronApp, optimizer } from '@electron-toolkit/utils';
 import type { } from '@shared/types';
@@ -10,7 +10,8 @@ import getPreviewList from './getPreviewList';
 import changeJsonFile from './changeJson';
 import { isPathInPetsFileDir } from './isPathInPetsFileDir';
 import axios from 'axios';
-
+import logger from 'electron-log';
+import { exec } from 'child_process';
 
 // 获取单例锁 如果是多次执行的实例 直接关闭
 if (!app.requestSingleInstanceLock()) { app.quit() };
@@ -37,23 +38,29 @@ if (!fs.existsSync(petsFileDir)) {
 }
 
 
+
 // 启动桌宠
 const startPet = (infor: PreviewInforIpc) => {
-  // 创建桌宠视口，并返回窗口id
-  const windowInfor = createPetWindow(infor)
+  try {
+    // 创建桌宠视口，并返回窗口id
+    const windowInfor = createPetWindow(infor);
 
-  windowSizeMap.set(
-    windowInfor.windowId,
-    {
-      w: windowInfor.windowWidth,
-      h: windowInfor.windowHeight
-    }
-  )
+    windowSizeMap.set(
+      windowInfor.windowId,
+      {
+        w: windowInfor.windowWidth,
+        h: windowInfor.windowHeight
+      }
+    );
 
-  windowPetMap.set(infor.id, windowInfor.windowId)
+    windowPetMap.set(infor.id, windowInfor.windowId);
 
-  return windowInfor.windowId
+    return windowInfor.windowId;
+  } catch (error) {
+    throw error;
+  }
 }
+
 
 
 // 创建托盘
@@ -123,7 +130,8 @@ app.whenReady().then(() => {
       const data = fs.readFileSync(normalize(path), 'utf8');
       return JSON.parse(data);
     } catch (error) {
-      throw error
+      logger.error(error);
+      return null;
     }
   });
 
@@ -139,7 +147,8 @@ app.whenReady().then(() => {
       const buffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
       return buffer;
     } catch (error) {
-      throw error
+      logger.error(error);
+      return null;
     }
   })
 
@@ -148,10 +157,11 @@ app.whenReady().then(() => {
   // 开启桌宠窗口
   ipcMain.handle('start-pet', (_event, infor: PreviewInforIpc) => {
     try {
-      const windowId = startPet(infor)
-      return windowId
+      const windowId = startPet(infor);
+      return windowId;
     } catch (error) {
-      throw error
+      logger.error(error);
+      return null;
     }
   });
 
@@ -159,12 +169,12 @@ app.whenReady().then(() => {
   // 关闭桌宠窗口
   ipcMain.handle('stop-pet', (_event, windowId: number, petId: string) => {
     try {
-      const win = BrowserWindow.fromId(windowId)
-      windowPetMap.delete(petId)
-      if (!win) { throw new Error('The window pointed to by ID does not exist') }
-      win.close()
+      const win = BrowserWindow.fromId(windowId);
+      windowPetMap.delete(petId);
+      if (!win) { throw new Error('stop-pet ID指向的窗口不存在'); }
+      win.close();
     } catch (error) {
-      throw error
+      logger.error(error);
     }
   });
 
@@ -172,25 +182,25 @@ app.whenReady().then(() => {
   // 移动窗口
   ipcMain.on('move-window', (event, deltaX: number, deltaY: number) => {
     try {
-      const win = BrowserWindow.fromWebContents(event.sender)
+      const win = BrowserWindow.fromWebContents(event.sender);
 
       if (!win || win.isDestroyed()) {
-        throw new Error('The window pointed to by ID does not exist or is hidden')
+        throw new Error('move-window ID指向的窗口不存在或隐藏');
       }
 
       const size = windowSizeMap.get(win.id);
-      if (!size) { throw new Error('Unable to obtain preset size') }
+      if (!size) { throw new Error('move-window 无法获取预设大小'); }
 
-      const [x, y] = win.getPosition()
+      const [x, y] = win.getPosition();
       win.setBounds({
         x: x + deltaX,
         y: y + deltaY,
         width: size.w,
         height: size.h
-      })
+      });
 
     } catch (error) {
-      throw error
+      logger.error(error);
     }
   });
 
@@ -206,7 +216,7 @@ app.whenReady().then(() => {
         }
 
         const win = BrowserWindow.fromId(windowId)
-        if (!win) { throw new Error('The window pointed to by ID does not exist') }
+        if (!win) { throw new Error('ipc-change-volume ID指向的窗口不存在') }
 
         // 发送信号 命令指定桌宠页面调整音量
         win.webContents.send('send-change-volume', volumeNumber);
@@ -214,9 +224,10 @@ app.whenReady().then(() => {
         await changeJsonFile(previewJsonPath, ["volume"], volumeNumber);
 
       } catch (error) {
-        throw error
+        logger.error(error);
       }
     })
+
 
 
   // 修改默认启动位置配置
@@ -229,7 +240,7 @@ app.whenReady().then(() => {
         }
 
         const win = BrowserWindow.fromId(windowId);
-        if (!win) { throw new Error('The window pointed to by ID does not exist') }
+        if (!win) { throw new Error('ipc-change-position ID指向的窗口不存在') }
 
         const [x, y] = win.getPosition();
 
@@ -238,7 +249,8 @@ app.whenReady().then(() => {
         return { x, y };
 
       } catch (error) {
-        throw error
+        logger.error(error);
+        return { x: 0, y: 0 };
       }
     })
 
@@ -256,7 +268,7 @@ app.whenReady().then(() => {
         // 修改配置文件 设置启动位置
         await changeJsonFile(previewJsonPath, ["position"], { x: -100000, y: -100000 });
       } catch (error) {
-        throw error
+        logger.error(error);
       }
     })
 
@@ -273,7 +285,7 @@ app.whenReady().then(() => {
         // 修改配置文件 设置是否自启
         await changeJsonFile(previewJsonPath, ["selfStart"], flag);
       } catch (error) {
-        throw error
+        logger.error(error);
       }
     })
 
@@ -283,9 +295,10 @@ app.whenReady().then(() => {
   ipcMain.handle('ipc-synchronous-pet-window-id',
     async (_event) => {
       try {
-        return Object.fromEntries(windowPetMap)
+        return Object.fromEntries(windowPetMap);
       } catch (error) {
-        throw error
+        logger.error(error);
+        return {};
       }
     })
 
@@ -299,6 +312,7 @@ app.whenReady().then(() => {
   });
 
 
+
   // 监听获取当前状态请求
   ipcMain.handle('get-auto-launch', async () => {
     const settings = app.getLoginItemSettings();
@@ -309,9 +323,9 @@ app.whenReady().then(() => {
 
   ipcMain.handle('open-pet-path', async () => {
     try {
-      await shell.openPath(petsFileDir)
+      exec(`explorer "${resolve(petsFileDir)}"`);
     } catch (error) {
-      throw error
+      logger.error(error);
     }
   });
 
@@ -325,19 +339,20 @@ app.whenReady().then(() => {
         const { data } = await axios.get(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
 
         if (data.code !== 0) {
-            throw new Error(`API 返回错误`);
+          throw new Error(`bilibili API 返回错误`);
         }
 
         if (!data.data.live_status) {
-            throw new Error(`API 返回错误`);
+          throw new Error(`bilibili API 返回错误`);
         }
 
         return {
-            flag: data.data.live_status === 1 ? true : false,
-            time: data.data.live_time
+          flag: data.data.live_status === 1 ? true : false,
+          time: data.data.live_time
         }
 
       } catch (error) {
+        logger.error(error);
         return {
           flag: false,
           time: null
@@ -398,7 +413,7 @@ app.whenReady().then(() => {
 
     })
     .catch((e) => {
-      console.log(e);
+      logger.error(e);
     })
 
 })

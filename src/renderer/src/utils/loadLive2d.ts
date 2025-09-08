@@ -1,3 +1,6 @@
+import logger from 'electron-log';
+
+
 export const loadLive2DCore = () => {
     const src = new URL('@core/live2dcubismcore.js', import.meta.url).href;
 
@@ -17,11 +20,13 @@ export const loadLive2DCore = () => {
             if (window.Live2DCubismCore) {
                 resolve();
             } else {
+                logger.error(new Error('Live2DCubismCore failed to load'));
                 reject(new Error('Live2DCubismCore failed to load'));
             }
         };
 
         script.onerror = () => {
+            logger.error(new Error('Failed to load live2dcubismcore.js'));
             reject(new Error('Failed to load live2dcubismcore.js'));
         };
 

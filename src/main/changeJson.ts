@@ -1,4 +1,5 @@
 import fs from 'fs';
+import logger from 'electron-log';
 
 
 /**
@@ -94,7 +95,7 @@ const changeJsonFile = async (path: string, attributeChain: string[], value: any
 
 
     } catch (error) {
-        throw error;
+        logger.error(error);
     }
 }
 

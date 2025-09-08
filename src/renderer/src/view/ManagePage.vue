@@ -2,6 +2,7 @@
 import { ElMessage } from 'element-plus'
 import { computed, Ref, ref } from 'vue'
 import DescribeBox from '@renderer/components/DescribeBox.vue'
+import logger from 'electron-log'
 
 const errorInfor = ref('')
 
@@ -100,6 +101,7 @@ const getPreviewList = async () => {
     });
 
   } catch (error) {
+    logger.error(error)
     errorInfor.value = `错误信息：${error}`
   }
 }
@@ -148,11 +150,14 @@ const startPet = async (key: string) => {
     }
     // 开启桌宠窗口 并获取窗口id
     const windowId = await window.electron.ipcRenderer.invoke('start-pet', infor) as number
+
+    if (windowId == null) { throw new Error('桌宠窗口启动失败'); }
     // 设置窗口id
     item.windowId = windowId
     // 解锁按钮 关闭加载动画
     startPetButtonLock.value = false
   } catch (error) {
+    logger.error(error)
     ElMessage.error('启动失败')
   }
 }
@@ -174,6 +179,7 @@ const stopPet = async (key: string) => {
     item.windowId = null
     stopPetButtonLock.value = false
   } catch (error) {
+    logger.error(error)
     ElMessage.error('关闭失败')
   }
 }
@@ -190,6 +196,7 @@ const changeVolume = debounce(async (volume: number, windowId: number | null, pr
       await window.electron.ipcRenderer.invoke('ipc-change-volume', windowId, volume, previewJsonPath);
     }
   } catch (error) {
+    logger.error(error)
     ElMessage.error('音量设置失败');
   }
 }, 500)
@@ -211,6 +218,7 @@ const changePosition = throttle(async (key: string) => {
     item.previewInfor.position.y = result.y
     ElMessage.success('设置成功')
   } catch (error) {
+    logger.error(error)
     ElMessage.error('设置失败')
   }
 
@@ -243,6 +251,7 @@ const resetPosition = throttle(async (key: string) => {
     resetPositionButtonLock.value = false
     ElMessage.success('重置成功')
   } catch (error) {
+    logger.error(error)
     ElMessage.error('重置失败')
   }
 
@@ -264,6 +273,7 @@ const changeSelfStart = throttle(async (key: string, flag: boolean) => {
 
     ElMessage.success('设置成功')
   } catch (error) {
+    logger.error(error)
     ElMessage.success('设置失败')
   }
   changeSelfStartButtonLock.value = false

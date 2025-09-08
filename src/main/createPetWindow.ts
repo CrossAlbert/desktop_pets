@@ -18,7 +18,7 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
         frame: false,
         // 窗口没有背景颜色
         transparent: true,
-        thickFrame:false,
+        thickFrame: false,
         // 防止用户调整窗口大小
         resizable: false,
         // 禁止用户将窗口置于全屏模式
@@ -26,7 +26,8 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
         // 使窗口的标题栏隐藏
         titleBarStyle: 'hidden',
         // 窗口不在任务栏显示
-        skipTaskbar:true,
+        skipTaskbar: true,
+        title: `桌宠窗口-${infor.name}`,
         ...(process.platform === 'linux' ? { icon } : {}),
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),

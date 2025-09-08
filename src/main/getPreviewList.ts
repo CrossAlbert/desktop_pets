@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import logger from 'electron-log';
 
 
 const getPreviewList = async (dirPath: string): Promise<Array<PreviewItemIpc>> => {
@@ -41,7 +42,7 @@ const getPreviewList = async (dirPath: string): Promise<Array<PreviewItemIpc>> =
         return previewList;
 
     } catch (error) {
-        console.log(error);
+        logger.error(error)
         return [];
     }
 }

@@ -3,6 +3,7 @@ import MaskBox from '@renderer/components/MaskBox.vue';
 import { onMounted, onUnmounted, ref } from 'vue';
 import { live2dManage } from '../live2d/main';
 import { useRoute } from 'vue-router';
+import logger from 'electron-log';
 const route = useRoute();
 
 const dragFlag = ref(false);
@@ -45,37 +46,45 @@ let live2dManageInstance: live2dManage | null = null;
 
 
 onMounted(async () => {
-    const {
-        petFilePath,
-        live2dFolder,
-        modelJsonName,
-        volume
-    } = route.params as unknown as PreviewInforIpc;
+    try {
+        const {
+            petFilePath,
+            live2dFolder,
+            modelJsonName,
+            volume
+        } = route.params as unknown as PreviewInforIpc;
 
-    // 开启实例
-    live2dManageInstance = new live2dManage({ petFilePath, live2dFolder, modelJsonName, containerId: 'canvas_container' });
-    await live2dManageInstance.start();
-    live2dManageInstance.changeVolume(volume);
+        // 开启实例
+        live2dManageInstance = new live2dManage({ petFilePath, live2dFolder, modelJsonName, containerId: 'canvas_container' });
+        await live2dManageInstance.start();
+        live2dManageInstance.changeVolume(volume);
 
 
-    // 添加右键监听 用于拖动窗口
-    document.addEventListener('mousedown', mousedownHandle);
-    document.addEventListener('mouseup', mouseupHandle);
-    document.addEventListener('mousemove', mousemoveHandle);
+        // 添加右键监听 用于拖动窗口
+        document.addEventListener('mousedown', mousedownHandle);
+        document.addEventListener('mouseup', mouseupHandle);
+        document.addEventListener('mousemove', mousemoveHandle);
+    } catch (error) {
+        logger.error(error);
+    }
 })
 
 
 
 
 onUnmounted(() => {
-    // 关闭sdk 
-    if (live2dManageInstance) {
-        live2dManageInstance.stop();
+    try {
+        // 关闭sdk 
+        if (live2dManageInstance) {
+            live2dManageInstance.stop();
+        }
+        // 移除监听
+        document.removeEventListener('mousedown', mousedownHandle);
+        document.removeEventListener('mouseup', mouseupHandle);
+        document.removeEventListener('mousemove', mousemoveHandle);
+    } catch (error) {
+        logger.error(error);
     }
-    // 移除监听
-    document.removeEventListener('mousedown', mousedownHandle);
-    document.removeEventListener('mouseup', mouseupHandle);
-    document.removeEventListener('mousemove', mousemoveHandle);
 })
 
 

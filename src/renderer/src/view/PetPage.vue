@@ -43,6 +43,10 @@ const mousemoveHandle = (e: MouseEvent) => {
 
 
 let live2dManageInstance: live2dManage | null = null;
+// 轮询计时器
+let liveTimer: NodeJS.Timeout | null = null;
+// 上一次记录的直播时间
+let lastLiveTime: string | null = null;
 
 
 onMounted(async () => {
@@ -51,13 +55,28 @@ onMounted(async () => {
             petFilePath,
             live2dFolder,
             modelJsonName,
-            volume
+            volume,
+            roomId,
+            roomName
         } = route.params as unknown as PreviewInforIpc;
 
         // 开启实例
         live2dManageInstance = new live2dManage({ petFilePath, live2dFolder, modelJsonName, containerId: 'canvas_container' });
         await live2dManageInstance.start();
         live2dManageInstance.changeVolume(volume);
+
+
+        if (roomId && roomName) {
+            liveTimer = setInterval(
+                async () => {
+                    const newLiveTime = await window.electron.ipcRenderer.invoke(
+                        'ipc-poll-bilibili-live',
+                        roomId, roomName, lastLiveTime
+                    );
+                    lastLiveTime = newLiveTime;
+                }, 120000
+            )
+        }
 
 
         // 添加右键监听 用于拖动窗口
@@ -77,6 +96,10 @@ onUnmounted(() => {
         // 关闭sdk 
         if (live2dManageInstance) {
             live2dManageInstance.stop();
+        }
+
+        if ( liveTimer ) {
+            clearInterval(liveTimer);
         }
         // 移除监听
         document.removeEventListener('mousedown', mousedownHandle);

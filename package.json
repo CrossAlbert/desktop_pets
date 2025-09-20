@@ -1,6 +1,6 @@
 {
   "name": "desktop_pets",
-  "version": "1.2.3",
+  "version": "1.2.6",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",

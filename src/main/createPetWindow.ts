@@ -99,7 +99,9 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
                 petFilePath: infor.petFilePath,
                 live2dFolder: infor.live2dFolder,
                 modelJsonName: infor.modelJsonName,
-                volume: infor.volume
+                volume: infor.volume,
+                roomName: infor.roomName,
+                roomId: infor.roomId
             }
         }
         // 发送信号切换路由到控制页面

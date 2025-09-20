@@ -47,6 +47,10 @@ declare global {
     modelJsonName: string
     // 是否自启
     selfStart: boolean
+    // 需要轮询开播状态的直播间ID
+    roomId: number | null
+    // 需要轮询开播状态的直播间名称
+    roomName: string | null
   }
 
 
@@ -117,11 +121,6 @@ declare global {
     sleep: Array<SleepItem> | null
     // 唤醒动画和语音
     awaken: Array<AwakenItem> | null
-    // 需要轮询开播状态的直播间 以及开播状态所需的触发内容
-    liveMonitor: {
-      roomId: number
-      relationship: RelationshipItem
-    } | null
     // 触摸动画列表
     touchList: Array<TouchItem>
   }

@@ -12,6 +12,7 @@ import { isPathInPetsFileDir } from './isPathInPetsFileDir';
 import axios from 'axios';
 import logger from 'electron-log';
 import { exec } from 'child_process';
+import { showNotification } from './showNotification';
 
 // 获取单例锁 如果是多次执行的实例 直接关闭
 if (!app.requestSingleInstanceLock()) { app.quit() };
@@ -106,6 +107,9 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  // 启动日志
+  // logger.info('软件启动');
 
 
   // 禁用刷新快捷键
@@ -333,30 +337,24 @@ app.whenReady().then(() => {
 
   // 轮询直播间状态
   ipcMain.handle('ipc-poll-bilibili-live',
-    async (_event, roomId: number) => {
+    async (_event, roomId: number, roomName: string, oldLiveTime: string | null) => {
       try {
-
         const { data } = await axios.get(`https://api.live.bilibili.com/room/v1/Room/get_info?room_id=${roomId}`);
 
         if (data.code !== 0) {
           throw new Error(`bilibili API 返回错误`);
         }
 
-        if (!data.data.live_status) {
-          throw new Error(`bilibili API 返回错误`);
+        const newLiveTime = data.data.live_time;
+        if (oldLiveTime === null || newLiveTime !== oldLiveTime) {
+          showNotification(roomId, roomName);
         }
 
-        return {
-          flag: data.data.live_status === 1 ? true : false,
-          time: data.data.live_time
-        }
+        return newLiveTime;
 
       } catch (error) {
         logger.error(error);
-        return {
-          flag: false,
-          time: null
-        }
+        return '0';
       }
     })
 

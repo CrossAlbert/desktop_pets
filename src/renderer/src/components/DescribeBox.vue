@@ -114,36 +114,6 @@ const data = ref([
                                 ]
                             },
                             {
-                                label: 'liveMonitor: Object | null',
-                                children: [
-                                    {
-                                        label: '用途：轮询指定直播间是否开播',
-                                    },
-                                    {
-                                        label: '可设置为null',
-                                    },
-                                    {
-                                        label: 'roomId: number',
-                                        children: [
-                                            {
-                                                label: '需要监听的直播间房间号',
-                                            },
-                                        ]
-                                    },
-                                    {
-                                        label: 'relationship: RelationshipItem',
-                                        children: [
-                                            {
-                                                label: '发现直播间开播后执行的动作与语音',
-                                            },
-                                            {
-                                                label: 'RelationshipItem见下方泛型解释',
-                                            },
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
                                 label: 'sleep: Array<SleepItem> | null',
                                 children: [
                                     {
@@ -406,6 +376,22 @@ const data = ref([
                                     }
                                 ]
                             },
+                            {
+                                label: 'roomId: number | null',
+                                children: [
+                                    {
+                                        label: '需要轮询开播状态的直播间ID'
+                                    }
+                                ]
+                            },
+                            {
+                                label: 'roomName: string | null',
+                                children: [
+                                    {
+                                        label: '需要轮询开播状态的直播间名称'
+                                    }
+                                ]
+                            }
 
                         ]
                     }

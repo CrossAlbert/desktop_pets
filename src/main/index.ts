@@ -99,8 +99,8 @@ const createTray = () => {
 // 有些 API 只有在该事件发生后才能使用
 app.whenReady().then(() => {
   // 为windows设置应用程序用户模型id
-  electronApp.setAppUserModelId('com.electron')
-
+  electronApp.setAppUserModelId('com.desktop_pets.electron.app')
+ 
   // 在开发环境下，默认使用 F12 打开或关闭开发者工具（DevTools）
   // 在生产环境下则忽略 CommandOrControl + R（刷新快捷键）
   // 详见：https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -346,7 +346,7 @@ app.whenReady().then(() => {
         }
 
         const newLiveTime = data.data.live_time;
-        if (oldLiveTime === null || newLiveTime !== oldLiveTime) {
+        if ((oldLiveTime === null || newLiveTime !== oldLiveTime) && data.data.live_status === 1) {
           showNotification(roomId, roomName);
         }
 

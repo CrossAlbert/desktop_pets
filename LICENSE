@@ -1,0 +1,44 @@
+Custom License (Non-Commercial, based on MIT)
+=============================================
+
+Copyright (c) 2025 [Cross_Albert]
+
+This software is licensed under a custom license derived from the MIT License.
+It is free for personal and non-commercial use, with the following conditions.
+
+---------------------------------------------
+1. Non-Commercial Use
+---------------------------------------------
+This software may be used, copied, modified, merged, published, and distributed
+for **non-commercial purposes only**.
+
+Commercial use — including but not limited to selling, sublicensing, or
+incorporating this software into a commercial product or service — is
+**prohibited without explicit written permission** from the author.
+
+---------------------------------------------
+2. Live2D SDK Restriction
+---------------------------------------------
+This project integrates with the Live2D SDK.
+Live2D SDK files are **not included** in this repository and must be obtained
+from [Live2D Inc.](https://www.live2d.com/) under their own license terms.
+
+You must comply with Live2D’s official license agreement when using the SDK.
+
+---------------------------------------------
+3. Attribution and Distribution
+---------------------------------------------
+Redistributions of this software or modified versions must retain:
+- This license notice
+- The original copyright notice
+
+---------------------------------------------
+4. Disclaimer
+---------------------------------------------
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

@@ -1,0 +1,43 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": [
+    "src/renderer/src/env.d.ts",
+    "src/renderer/src/**/*",
+    "src/renderer/src/**/*.vue",
+    "src/preload/*.d.ts",
+    "src/live2dSDK/Framework/src/**/*",
+    "src/live2dSDK/Framework/src/*",
+  ],
+  "compilerOptions": {
+    // 为了解决live2d sdk 在该项目中ts编译不通过问题
+    // start
+    "skipLibCheck": true,
+    "strict": false,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "allowUnusedLabels": true,
+    "allowUnreachableCode": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    //end
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": [
+        "src/renderer/src/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@framework/*": [
+        "src/live2dSDK/Framework/src/*"
+      ],
+      "@core/*": [
+        "src/live2dSDK/Core/*"
+      ]
+    }
+  },
+  "exclude": [
+    // "src/live2dSDK/Framework/src/*"
+  ]
+}

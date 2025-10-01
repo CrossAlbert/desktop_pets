@@ -1,0 +1,11 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+# 忽略 内容，但保留文件夹本身
+src/live2dSDK/Core/*
+!src/live2dSDK/Core/.gitkeep
+src/live2dSDK/Framework/*
+!src/live2dSDK/Framework/.gitkeep

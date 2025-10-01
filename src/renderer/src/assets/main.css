@@ -1,0 +1,54 @@
+* {
+  padding: 0px;
+  margin: 0px;
+}
+
+@font-face {
+  font-family: 'HarmonyOS_woff2';
+  /* 自定义字体名称 */
+  src: url('./font/HarmonyOS_Sans_SC_Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+span {
+  font-family: 'HarmonyOS_woff2';
+  user-select: none;
+}
+
+button{
+  font-family: 'HarmonyOS_woff2';
+}
+
+div {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+
+::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+  background-color: #ffffff00;
+}
+
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #CDD0D6;
+}
+
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}

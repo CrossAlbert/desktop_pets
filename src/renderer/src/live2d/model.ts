@@ -540,7 +540,6 @@ export class Model extends CubismUserModel {
 
 
   /**
-   * 目标驱动
    * 开始播放由参数指定的运动 
    * @param group 运动组名称
    * @param no 组中的编号
@@ -630,7 +629,6 @@ export class Model extends CubismUserModel {
 
 
   /**
-   * 目标驱动
    * 设置参数指定的表情运动
    *
    * @param expressionId 表情运动ID

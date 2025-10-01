@@ -3,8 +3,6 @@ import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 // import setDesktopChild from '../setDesktopChild/Release/setDesktopChild.node'
-// import wef from '../winExtendFeatures/Release/winExtendFeatures.node'
-
 
 // 创建桌宠窗口
 const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
@@ -113,7 +111,6 @@ const createPetWindow = (infor: PreviewInforIpc): PetWindowInfor => {
     // const hwndEec = hwndBuffer.readUInt32LE(0)
     // 将窗口置于桌面内作为子窗口
     // setDesktopChild.setDesktopChild(hwndEec)
-    // wef.changDesktop(hwndEec)
 
     return {
         windowId: petWindow.id,

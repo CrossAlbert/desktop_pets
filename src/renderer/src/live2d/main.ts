@@ -34,6 +34,8 @@ export class live2dManage {
   // 桌宠配置
   private _petConfig: PetConfig | null;
   // 画布物理像素缩放值
+  // 使用超采样技术：增大画布的物理分辨率，再通过 context 缩放匹配逻辑尺寸，  
+  // 提升渲染精度，解决部分 Live2D 模型在未知的渲染模糊问题
   private _physicalScale: number;
   // 开播状态轮询
   private _pollingTimer: null | NodeJS.Timeout;

@@ -109,12 +109,7 @@ app.whenReady().then(() => {
   })
 
   // 启动日志
-  // logger.info('软件启动');
-
-
-  // 禁用刷新快捷键
-  globalShortcut.register('CommandOrControl+R', () => { });
-  globalShortcut.register('F5', () => { });
+  logger.info('软件启动');
 
 
 

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, Tray, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron';
 import icon from '../../resources/icon.png?asset';
 import { join, normalize, resolve } from 'path';
 import fs from 'fs';
